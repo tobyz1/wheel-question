@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Roue des Questions</title>
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
     <div class="page-wrapper">
+
+        <!-- Roue -->
         <div class="container">
             <div class="spinBtn">spin</div>
             <div class="wheel">
@@ -23,264 +27,194 @@
                 <div class="number" style="--i:12;--clr:#ffed6f;"><span>Loisirs</span></div>
             </div>
         </div>
- 
+
+        <!-- Question -->
         <div class="question-container">
-            <h2><span id="selected-theme">Aucun</span></h2>
+            <span class="theme-label">Thème</span>
+            <span id="selected-theme">—</span>
+            <div class="divider"></div>
             <div id="question-display">
-                <!-- La question aléatoire sera affichée ici -->
+                <p><strong>Faites tourner la roue pour découvrir une question.</strong></p>
             </div>
+            <p class="hint">Appuyez sur SPIN pour commencer</p>
         </div>
+
     </div>
- 
+
     <script>
-        // Questions pour chaque thème
         const themesQuestions = {
             "Souvenirs": [
-            "Quel est ton premier souvenir ?",
-"Est-ce que tu es boloss ou est-ce que tu bolossais au collège ?",
-"En quatre minutes, racontez votre vie de la façon la plus détaillée possible.",
-"Ta plus grande douleur physique ?",
-"Quel est votre souvenir le plus précieux ?",
-"Quel est votre plus terrible souvenir ?",
-"Quel est le truc que tu faisais ado dont tu as honte aujourd'hui ?",
-"Raconte ta pire galère de soirée, celle dont tu te souviendras toujours.",
-"As-tu déjà vécu une expérience paranormale ? Ou juste un moment étrange que tu n'arrives pas à expliquer ?",
-"As-tu déjà été viré·e de cours ou pris une heure de colle au collège/lycée ? Si oui, pourquoi ?",
-"Avez-vous déjà écrit une chanson pour quelqu'un ?",
-"Croyez-vous en l'utilité d'un porte-bonheur ou d'un objet pour les examens ?",
-"Pensez-vous que des extraterrestres puissent un jour visiter la Terre ?",
-"Avez-vous un ami imaginaire ?",
-"Avez-vous déjà souhaité pouvoir parler aux animaux et comprendre ce qu'ils disent ?",
-"Avez-vous un super-héros préféré ?",
-"Aimez-vous participer aux discussions et aux débats en classe ?",
-"Aimez-vous écrire vos propres histoires ou poèmes ?",
-"Avez-vous déjà écrit une lettre à votre futur moi ?",
-"Quelle est la dernière chose qui t'a fait pleurer ?",
-"Quelle est ta matière scolaire favorite ?",
-"À quand remonte la dernière fois où vous vous êtes senti(e) chanceux(se) d'être vous ?",
-"Qu'est-ce que votre jeune moi ne croirait pas à propos de votre vie d'aujourd'hui ?",
-"Quel est votre meilleur souvenir d'enfance ?",
-"Quelle est l'action que vous regrettez le plus ?",
-"Quel est votre plus grand regret ?",
- 
+                "Quel est ton premier souvenir ?",
+                "Est-ce que tu étais plutôt boloss ou populaire au collège ?",
+                "En quatre minutes, racontez votre vie de la façon la plus détaillée possible.",
+                "Ta plus grande douleur physique ?",
+                "Quel est votre souvenir le plus précieux ?",
+                "Quel est votre plus terrible souvenir ?",
+                "Quel est le truc que tu faisais ado dont tu as honte aujourd'hui ?",
+                "Raconte ta pire galère de soirée, celle dont tu te souviendras toujours.",
+                "As-tu déjà vécu une expérience paranormale ?",
+                "As-tu déjà été viré·e de cours ou pris une heure de colle ? Si oui, pourquoi ?",
+                "Quelle est la dernière chose qui t'a fait pleurer ?",
+                "Qu'est-ce que votre jeune moi ne croirait pas à propos de votre vie d'aujourd'hui ?",
+                "Quel est votre meilleur souvenir d'enfance ?",
+                "Quelle est l'action que vous regrettez le plus ?",
+                "Quel est votre plus grand regret ?",
             ],
             "Perception": [
                 "Est-ce que tu aimes bien ton visage ?",
-"Est-ce que tu aimes bien ton nom ?",
-"Si vous pouviez vous réveiller demain matin avec une qualité ou une capacité de plus, que serait-ce ?",
-"Pensez-vous que vous êtes extraverti(e) ?",
-"C'est quoi ton rythme de vie (lève-tôt, couche-tard, etc.) ?",
-"À quelle heure dînez-vous habituellement ?",
-"Pensez-vous que vous êtes une personne froide ?",
-"Fais-tu partie des 10% des gens qui n'ont pas de voix dans leur tête ?",
-"As-tu déjà remarqué une particularité physique étonnante chez toi ?",
-"Si tu ne pouvais plus porter qu'une seule tenue de ton dressing, tu choisirais quoi ?",
-"Avez-vous un talent caché ?",
-"Donne cinq mots pour te décrire.",
-"Quel compliment t'a le plus marqué ?",
-"Nomme une chose que tu aimes chez toi.",
-"Qu'est-ce que les gens pensent à tort de toi ?",
-"Qu'essayez-vous encore de vous prouver ?",
-"Est-ce que vous vous mentez à vous-même à propos de quelque chose ?",
-"Quel est l'adjectif qui vous décrirait le mieux dans le passé et aujourd'hui ?",
-"En quoi êtes-vous meilleur(e) que la plupart des gens que vous connaissez ?",
-"Qu'est-ce que vous voulez changer dans votre personnalité en ce moment ?",
-"Qu'est-ce qui vous a surpris chez vous-même ?",
-"À votre avis, quel est votre super pouvoir ?",
-"Dans quel domaine êtes-vous le plus qualifié pour donner des conseils ?",
-"Qu'avez-vous appris sur vous-même en jouant à ce jeu ?",
-"Quelle partie de vous-même voyez-vous en moi ?",
-"D'après ce que vous avez appris sur vous-même, que vous suggéreriez-vous de lire ?",
-"Que retiendriez-vous de vous-même lorsque vous ne serez plus en contact avec les autres ?",
-"En quoi pouvez-vous aider les autres ?",
-"Qu'avez-vous besoin d'entendre en ce moment ?",
-"Que vous suggérez-vous de laisser tomber ?",
-"Qu'est-ce que vous ne comprenez pas chez vous-même ?",
-"Comment vous décririez-vous à un inconnu ?"
- 
+                "Est-ce que tu aimes bien ton nom ?",
+                "Si vous pouviez vous réveiller demain avec une qualité de plus, que serait-ce ?",
+                "Pensez-vous que vous êtes extraverti(e) ?",
+                "C'est quoi ton rythme de vie (lève-tôt, couche-tard, etc.) ?",
+                "Pensez-vous que vous êtes une personne froide ?",
+                "As-tu déjà remarqué une particularité physique étonnante chez toi ?",
+                "Avez-vous un talent caché ?",
+                "Donne cinq mots pour te décrire.",
+                "Quel compliment t'a le plus marqué ?",
+                "Nomme une chose que tu aimes chez toi.",
+                "Qu'est-ce que les gens pensent à tort de toi ?",
+                "En quoi êtes-vous meilleur(e) que la plupart des gens que vous connaissez ?",
+                "Qu'est-ce qui vous a surpris chez vous-même ?",
+                "À votre avis, quel est votre super pouvoir ?",
+                "Comment vous décririez-vous à un inconnu ?",
             ],
             "Avenir": [
-                "Si vous pouviez vivre plus de 100 ans et conserver l'esprit ou le corps d'une personne de 30 ans pendant les 70 dernières années de votre vie, qui choisiriez-vous d'être ?",
-"Avez-vous une idée quelconque sur la façon dont vous allez mourir ?",
-"Pour quoi dans ta vie avez-vous le plus de gratitude ?",
-"Si une boule de cristal pouvait vous dire la vérité sur vous-même, votre vie, l'avenir ou quoi que ce soit d'autre, que voudriez-vous savoir ?",
-"Y a-t-il quelque chose que vous avez rêvé de faire depuis longtemps ? Pourquoi ne l'avez-vous pas encore réalisée ?",
-"Quel est le plus grand accomplissement de votre vie ?",
-"Si vous appreniez que dans une année vous mourriez soudainement, changeriez-vous quelque chose à propos de votre vie actuelle ? Pourquoi ?",
-"Si tu devais choisir une maladie incurable pour mourir ?",
-"Si vous deviez mourir ce soir sans pouvoir communiquer avec qui que ce soit, qu'est-ce que vous regretteriez le plus de n'avoir pas dit à quelqu'un ? Pourquoi ne l'avez-vous pas encore dit ?",
-"As-tu une bucket list ?",
-"Si tu avais tout l'argent du monde, tu achèterais quoi ?",
-"Quelle est la plus grosse erreur que vous ayez commise ?",
-"À quelle question essayez-vous de répondre dans votre vie en ce moment ?",
-"Que diriez-vous à votre moi plus jeune ?",
-"À qui voulez-vous parler quand vous vous sentez seul(e) ?",
-"Qu'est-ce qui est le plus difficile dans le fait de vivre à l'étranger ?",
-"Pour les bi-nationaux, comment vous sentez-vous par rapport à vos terres natales : intégrés par les deux, rejetés par les deux… ?",
-"Quelle est la leçon que vous retiendrez de votre conversation avec les autres ?",
-"Pensez-vous que le pays dans lequel vous vivez est celui qui vous convient le mieux ?"
+                "Si une boule de cristal pouvait vous dire la vérité sur votre avenir, que voudriez-vous savoir ?",
+                "Y a-t-il quelque chose que vous avez rêvé de faire depuis longtemps ? Pourquoi ne l'avez-vous pas encore réalisé ?",
+                "Quel est le plus grand accomplissement de votre vie ?",
+                "Si vous appreniez que vous mourriez dans un an, changeriez-vous votre vie ?",
+                "As-tu une bucket list ?",
+                "Si tu avais tout l'argent du monde, tu achèterais quoi ?",
+                "À quelle question essayez-vous de répondre dans votre vie en ce moment ?",
+                "Que diriez-vous à votre moi plus jeune ?",
+                "Pensez-vous que le pays dans lequel vous vivez est celui qui vous convient le mieux ?",
             ],
             "Amitiés": [
-                "Quand avez-vous chanté pour la dernière fois ? Pour quelqu'un d'autre ?",
-"Nommez trois choses que vous avez en commun avec quelqu'un avec qui tu es actuellement.",
-"Qu'est-ce que vous appréciez le plus dans une amitié ?",
-"Que signifie l'amitié pour vous ?",
-"Faites trois énoncés concrets « nous » à tour de rôle. Par exemple, « Nous sommes en train de répondre aux 36 questions de ce questionnaire ».",
-"Décrivez cinq caractéristiques positives de votre partenaire, une à la fois et à tour de rôle.",
-"Terminez cette phrase : « J'aimerais avoir quelqu'un avec qui je pourrais partager ... ».",
-"Quelle est la chose la plus gentille que vous vous souvenez avoir faite pour un ami ?",
-"Quel est le plus beau cadeau que tes amis t'aient offert ?",
-"Quel est le pire cadeau que tes amis t'aient offert ?",
-"As-tu déjà embrassé une amie sur la bouche ?",
-"Quel est ton plus beau souvenir entre amis ?",
-"Quelle est la remarque la plus vexante qu'un ami t'aies faite ?",
-"As-tu déjà menti à tes amis ?",
-"Quelle est ta dernière grande fiesta entre amis ?",
-"Quelle est la pire chose que puisse te faire un ami ?",
-"Quelles sont les qualités indispensables pour être ton ami ?"
+                "Qu'est-ce que vous appréciez le plus dans une amitié ?",
+                "Que signifie l'amitié pour vous ?",
+                "Quelle est la chose la plus gentille que vous vous souvenez avoir faite pour un ami ?",
+                "Quel est le plus beau cadeau que tes amis t'aient offert ?",
+                "Quel est le pire cadeau que tes amis t'aient offert ?",
+                "Quel est ton plus beau souvenir entre amis ?",
+                "Quelle est la remarque la plus vexante qu'un ami t'ait faite ?",
+                "As-tu déjà menti à tes amis ?",
+                "Quelle est la pire chose que puisse te faire un ami ?",
+                "Quelles sont les qualités indispensables pour être ton ami ?",
             ],
             "Famille": [
                 "Quel est votre surnom de famille le plus embarrassant ?",
-"Quelle est la tradition familiale que vous chérissez le plus ?",
-"Quel membre de ta famille te ressemble le plus ?",
-"Quel est le secret de famille le mieux gardé ?",
-"Quelle est la leçon la plus importante que tes parents t'ont apprise ?",
-"Si tu pouvais choisir ta famille, est-ce que tu garderais la même ?"
+                "Quelle est la tradition familiale que vous chérissez le plus ?",
+                "Quel membre de ta famille te ressemble le plus ?",
+                "Quelle est la leçon la plus importante que tes parents t'ont apprise ?",
+                "Si tu pouvais choisir ta famille, est-ce que tu garderais la même ?",
+                "Quel secret de famille tout le monde connaît mais dont on ne parle jamais ?",
             ],
             "Amour": [
                 "Quelle est la chose la plus romantique que quelqu'un ait faite pour toi ?",
-"Quel est ton love language ?",
-"As-tu déjà été amoureux·se sans le dire ?",
-"Quelle qualité cherches-tu absolument chez un·e partenaire ?",
-"Crois-tu au coup de foudre ?"
+                "Quel est ton love language ?",
+                "As-tu déjà été amoureux·se sans le dire ?",
+                "Quelle qualité cherches-tu absolument chez un·e partenaire ?",
+                "Crois-tu au coup de foudre ?",
+                "Quelle est la pire rupture que tu aies vécue ?",
             ],
             "Travail": [
                 "Quel est ton pire souvenir au travail ?",
-"Si tu pouvais changer de métier demain, tu ferais quoi ?",
-"Qu'est-ce qui te motive vraiment dans ton travail ?",
-"As-tu déjà pris un congé maladie sans vraiment être malade ?"
+                "Si tu pouvais changer de métier demain, tu ferais quoi ?",
+                "Qu'est-ce qui te motive vraiment dans ton travail ?",
+                "As-tu déjà pris un congé maladie sans vraiment être malade ?",
+                "Quel collègue t'a le plus marqué·e, en bien ou en mal ?",
             ],
             "Malaises": [
                 "Quelle est la situation la plus gênante que tu aies vécue ?",
-"As-tu déjà envoyé un message à la mauvaise personne ?",
-"Quel est le mensonge dont tu as le plus honte ?",
-"As-tu déjà fait semblant de ne pas voir quelqu'un pour l'éviter ?"
+                "As-tu déjà envoyé un message à la mauvaise personne ?",
+                "Quel est le mensonge dont tu as le plus honte ?",
+                "As-tu déjà fait semblant de ne pas voir quelqu'un pour l'éviter ?",
+                "Quelle est la chose la plus embarrassante que tu aies faite en public ?",
             ],
             "Croyances": [
                 "Crois-tu en la vie après la mort ?",
-"Quelle est ta superstition la plus irrationnelle ?",
-"As-tu déjà eu un signe qui t'a semblé venir d'ailleurs ?",
-"En quoi crois-tu vraiment, même si c'est difficile à expliquer ?"
+                "Quelle est ta superstition la plus irrationnelle ?",
+                "As-tu déjà eu un signe qui t'a semblé venir d'ailleurs ?",
+                "En quoi crois-tu vraiment, même si c'est difficile à expliquer ?",
+                "Pensez-vous que des extraterrestres puissent exister ?",
             ],
             "Conflits": [
                 "Quelle est la dispute dont tu es le plus fier·e d'être sorti·e ?",
-"As-tu déjà coupé les ponts avec quelqu'un ? Pourquoi ?",
-"Comment réagis-tu quand quelqu'un te blesse ?",
-"Si tu pouvais avoir la dernière fois qu'il a tort ?",
-"Si tu pouvais avoir le dernier mot dans un conflit passé, que dirais-tu ?",
-"Si tu avais le pouvoir de tuer quelqu'un que tu connais à distance, est-ce que tu l'utiliserais ?",
-"Si tu pouvais revenir en arrière pour changer une décision que tu as prise, ce serait quoi ?",
-"Comment réagirais-tu en cas d'apocalypse zombie ? Tenterais-tu de survivre ou laisserais-tu tomber ?",
-"Qu'est-ce qui te met en colère ?",
-"Pouvez-vous tolérer quelqu'un qui vous a fait du mal ?"
+                "As-tu déjà coupé les ponts avec quelqu'un ? Pourquoi ?",
+                "Comment réagis-tu quand quelqu'un te blesse ?",
+                "Si tu pouvais avoir le dernier mot dans un conflit passé, que dirais-tu ?",
+                "Qu'est-ce qui te met vraiment en colère ?",
+                "Pouvez-vous tolérer quelqu'un qui vous a fait du mal ?",
             ],
             "Expériences": [
-                "Si vous aviez le choix, qui, dans le monde entier aimeriez-vous inviter à partager un repas ?",
-"Un conseil, bouteille à la mer, aux potentiels futurs générations ?",
-"Si tu pouvais voyager dans le temps pour assister à UN événement passé, ce serait quoi ?",
-"Quel est l'endroit où tu es allé·e où tu t'es senti·e le plus à l'aise et détendu·e ?",
-"Si tu pouvais voir n'importe quel·le artiste ou groupe en concert, mort ou vivant, qui choisirais-tu ?",
-"Si tu pouvais obtenir de nouvelles connaissances ou compétences sans rien faire, que choisirais-tu ?",
-"Avez-vous participé à un jeu-concours ou à un concours ?",
-"Vous considérez-vous comme un preneur de risques ?",
-"Essayeriez-vous de manger un mets exotique comme des insectes ou des serpents ?",
-"Avez-vous déjà vécu une expérience de mort imminente ?",
-"Avez-vous déjà ri si fort que vous avez reniflé ?",
-"Quel a été ton plus beau voyage ?",
-"Quelle recette fais-tu pour impressionner tes invités ?",
-"Quel est l'endroit où tu te sens le mieux ?",
-"Qu'est-ce qui te fait rire à tout coup ?",
-"Une bonne action dont tu es fier·e ?",
-"Quel risque es-tu content·e d'avoir pris ?",
-"Quelle est la plus belle chose que tu aies vue dans ta vie ?",
-"D'après vous, quelle chose devrait-on absolument expérimenter au moins une fois dans sa vie ?"
+                "Si tu pouvais voyager dans le temps pour assister à UN événement passé, ce serait quoi ?",
+                "Quel est l'endroit où tu t'es senti·e le plus à l'aise et détendu·e ?",
+                "Si tu pouvais voir n'importe quel·le artiste en concert, mort ou vivant, qui choisirais-tu ?",
+                "Vous considérez-vous comme un preneur de risques ?",
+                "Avez-vous déjà vécu une expérience de mort imminente ?",
+                "Quel a été ton plus beau voyage ?",
+                "Quel risque es-tu content·e d'avoir pris ?",
+                "Quelle est la plus belle chose que tu aies vue dans ta vie ?",
+                "D'après vous, quelle chose devrait-on absolument expérimenter au moins une fois dans sa vie ?",
             ],
             "Loisirs": [
-                "Meilleur et pire repas ?",
-"C'est quoi ton drapeau préféré ?",
-"Qu'est-ce qui constituerait une journée parfaite pour vous ?",
-"C'est quoi ton gros mot préféré ?",
-"Quel est votre mot préféré ?",
-"Ton icône d'appli préférée ?",
-"Trois ressources artistiques, linguistiques à recommander ?",
-"Apprends-nous quelque chose ?",
-"Pensez-vous que vous aimez passer du temps sur le canapé ?",
-"Préférez-vous cuisiner ou commander des plats à emporter ?",
-"Qu'est-ce que vous regardez/écoutez/lisez en boucle ces derniers temps ?",
-"Qui est votre idole préférée ?",
-"C'est quoi les couleurs que vous kiffez porter ?",
-"Savez-vous où se trouvent vos vacances de rêve ?",
-"Pensez-vous que vous aimez lire des livres ?",
-"Quelle est votre pièce préférée dans une maison ?",
-"Vous aimez jouer aux jeux vidéo ?",
-"Si tu ne pouvais plus regarder qu'un seul film, ce serait lequel ?",
-"Quelle célébrité te manquerait le plus si elle venait à mourir demain ?",
-"Quel est le meilleur cadeau que tu aies reçu ?",
-"Pour toi, quel est le meilleur super-pouvoir que l'on peut avoir ?",
-"Quelle émission télé nulle pourrais-tu regarder pendant des heures ?",
-"Quel aliment aimerais-tu pouvoir manger autant que tu veux sans risque pour ta santé ?",
-"Si tu pouvais parler aux animaux d'une espèce seulement, laquelle choisirais-tu ?",
-"Tu préférerais ne plus jamais pouvoir aller au cinéma ou ne plus jamais aller à un concert/festival ?",
-"Quel est le jeu dont tu ne pourrais jamais te lasser ?",
-"Avez-vous essayé des sports extrêmes ?",
-"Quel est ton repas préféré de la journée ?",
-"Quel a été ton concert favori à vie ?",
-"Es-tu plus sucré ou salé ?",
-"Quel genre de film es-tu incapable d'écouter ?",
-"Quels sports aimes-tu pratiquer ?",
-"Quel aliment détestes-tu ?",
-"Quelle est ton odeur favorite ?",
-"Quelle est ta destination voyage de rêve ?",
-"Quel artiste musical écoutes-tu le plus souvent ?",
-"Quelle application utilises-tu le plus sur ton téléphone ?"
+                "Qu'est-ce qui constituerait une journée parfaite pour vous ?",
+                "C'est quoi ton gros mot préféré ?",
+                "Qu'est-ce que vous regardez/écoutez/lisez en boucle ces derniers temps ?",
+                "Si tu ne pouvais plus regarder qu'un seul film, ce serait lequel ?",
+                "Quelle émission télé nulle pourrais-tu regarder pendant des heures ?",
+                "Quel aliment aimerais-tu pouvoir manger sans limite sans risque pour ta santé ?",
+                "Tu préférerais ne plus jamais aller au cinéma ou ne plus jamais aller à un concert ?",
+                "Quel est le jeu dont tu ne pourrais jamais te lasser ?",
+                "Es-tu plus sucré ou salé ?",
+                "Quelle est ta destination voyage de rêve ?",
+                "Quel artiste musical écoutes-tu le plus souvent ?",
             ]
         };
- 
-        let wheel = document.querySelector('.wheel');
-        let spinBtn = document.querySelector('.spinBtn');
+
+        const wheel   = document.querySelector('.wheel');
+        const spinBtn = document.querySelector('.spinBtn');
+        const hint    = document.querySelector('.hint');
         let value = Math.ceil(Math.random() * 3600);
-        let selectedTheme = "";
- 
-        spinBtn.onclick = function() {
+
+        spinBtn.onclick = function () {
             value += Math.ceil(Math.random() * 3600);
             wheel.style.transform = "rotate(" + value + "deg)";
             spinBtn.classList.add("blinking");
             wheel.classList.add("blinkaaa");
+            hint.style.opacity = '0';
         };
-        
-        wheel.addEventListener("transitionend", function() {
-            let actualRotation = value % 360;
-            let sectionIndex = Math.floor((actualRotation) / 30) % 12;
-            let themeList = ["Souvenirs", "Perception", "Avenir", "Amitiés", "Famille", "Amour", "Travail", "Malaises","Croyances","Conflits","Expériences","Loisirs"];
-            let selectedSection = document.querySelector(`.wheel .number:nth-child(${12 - sectionIndex + 1})`);
-            selectedTheme = themeList[selectedSection.style.getPropertyValue("--i") - 1];
-            let selectedColor = getComputedStyle(selectedSection).getPropertyValue('--clr');
-            document.body.style.background = selectedColor;
+
+        wheel.addEventListener("transitionend", function () {
+            const actualRotation = value % 360;
+            const sectionIndex   = Math.floor(actualRotation / 30) % 12;
+            const themeList = ["Souvenirs","Perception","Avenir","Amitiés","Famille","Amour","Travail","Malaises","Croyances","Conflits","Expériences","Loisirs"];
+            const selectedSection = document.querySelector(`.wheel .number:nth-child(${12 - sectionIndex + 1})`);
+            const selectedTheme   = themeList[selectedSection.style.getPropertyValue("--i") - 1];
+            const selectedColor   = getComputedStyle(selectedSection).getPropertyValue('--clr');
+
+            document.body.style.background = shadeColor(selectedColor, -55);
+            document.getElementById("selected-theme").textContent = selectedTheme;
+
             spinBtn.classList.remove("blinking");
             wheel.classList.remove("blinkaaa");
-            document.getElementById("selected-theme").textContent = selectedTheme;
- 
-            let questions = themesQuestions[selectedTheme];
-            let randomQuestion = getRandomQuestion(questions);
- 
-            document.getElementById("question-display").innerHTML = `
-                <p><strong>${randomQuestion}</strong></p>
-            `;
+
+            const questions    = themesQuestions[selectedTheme] || [];
+            const randomQ      = questions[Math.floor(Math.random() * questions.length)];
+            document.getElementById("question-display").innerHTML =
+                `<p><strong>${randomQ}</strong></p>`;
         });
- 
-        function getRandomQuestion(questions) {
-            let randomIndex = Math.floor(Math.random() * questions.length);
-            return questions[randomIndex];
+
+        /* Assombrit la couleur de fond pour un rendu plus élégant */
+        function shadeColor(hex, percent) {
+            hex = hex.trim();
+            let r = parseInt(hex.slice(1,3),16);
+            let g = parseInt(hex.slice(3,5),16);
+            let b = parseInt(hex.slice(5,7),16);
+            r = Math.max(0, Math.min(255, r + percent));
+            g = Math.max(0, Math.min(255, g + percent));
+            b = Math.max(0, Math.min(255, b + percent));
+            return `rgb(${r},${g},${b})`;
         }
     </script>
 </body>
