@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
- 
+
 @keyframes blink {
     0%   { background-color: rgb(204, 60, 60); }
     50%  { background-color: #fff; }
@@ -14,14 +14,14 @@
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
- 
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
- 
+
 body {
     display: flex;
     justify-content: center;
@@ -31,7 +31,7 @@ body {
     padding: 16px;
     transition: background 0.6s ease;
 }
- 
+
 /* ── Layout principal : roue + question côte à côte ── */
 .page-wrapper {
     display: flex;
@@ -42,7 +42,7 @@ body {
     width: 100%;
     max-width: 900px;
 }
- 
+
 /* ── Roue ── */
 .container {
     position: relative;
@@ -54,7 +54,7 @@ body {
     justify-content: center;
     align-items: center;
 }
- 
+
 .container .spinBtn {
     position: absolute;
     width: 56px;
@@ -76,7 +76,7 @@ body {
     transition: transform 0.15s ease;
 }
 .container .spinBtn:hover { transform: scale(1.09); }
- 
+
 .container .spinBtn::before {
     content: '';
     position: absolute;
@@ -86,10 +86,10 @@ body {
     background: #fff;
     clip-path: polygon(50% 0, 0 100%, 100% 100%);
 }
- 
+
 .blinking::before { animation: blink 0.5s infinite; }
 .blinking         { animation: blink 0.5s infinite; }
- 
+
 .container .wheel {
     position: absolute;
     top: 0; left: 0;
@@ -103,9 +103,9 @@ body {
                 0 8px 40px rgba(0,0,0,0.4);
     transition: transform 5s ease-in-out;
 }
- 
+
 .blinkaaa { animation: shadowBlink 0.5s infinite; }
- 
+
 .container .wheel .number {
     position: absolute;
     width: 50%; height: 50%;
@@ -119,7 +119,7 @@ body {
     user-select: none;
     cursor: pointer;
 }
- 
+
 .container .wheel .number span {
     position: relative;
     transform: rotate(45deg);
@@ -129,7 +129,7 @@ body {
     text-shadow: 1px 1px 2px rgba(255,255,255,0.35);
     white-space: nowrap;
 }
- 
+
 /* ── Zone question ── */
 .question-container {
     flex: 1;
@@ -138,7 +138,7 @@ body {
     flex-direction: column;
     gap: 10px;
 }
- 
+
 .theme-label {
     font-size: 0.68rem;
     font-weight: 700;
@@ -146,7 +146,7 @@ body {
     letter-spacing: 0.14em;
     color: rgba(255,255,255,0.35);
 }
- 
+
 #selected-theme {
     display: block;
     font-size: clamp(1.6rem, 3.5vw, 2.4rem);
@@ -155,55 +155,76 @@ body {
     line-height: 1.1;
     letter-spacing: -0.02em;
 }
- 
+
 .divider {
     width: 36px;
     height: 3px;
     background: rgba(255,255,255,0.18);
     border-radius: 2px;
 }
- 
+
 #question-display {
     font-size: clamp(0.88rem, 1.7vw, 1.05rem);
     line-height: 1.7;
     color: rgba(255,255,255,0.7);
     min-height: 50px;
 }
- 
+
 #question-display p { animation: fadeInUp 0.4s ease; }
 #question-display strong { font-weight: 600; color: #fff; }
- 
+
 .hint {
     font-size: 0.75rem;
     color: rgba(255,255,255,0.22);
     font-style: italic;
     margin-top: 4px;
 }
- 
+
 /* ── Mobile : colonne compacte ── */
 @media (max-width: 640px) {
     body {
         align-items: flex-start;
-        padding: 24px 16px 32px;
+        padding: 24px 16px 40px;
     }
- 
+
     .page-wrapper {
         flex-direction: column;
         align-items: center;
-        gap: 28px;
+        gap: 32px;
     }
- 
+
     .container {
         --wheel-size: min(84vw, 310px);
     }
- 
+
     .question-container {
         width: 100%;
         align-items: center;
         text-align: center;
-        gap: 8px;
+        gap: 12px;
     }
- 
-    #question-display { text-align: center; }
-    .hint             { text-align: center; }
+
+    .theme-label {
+        font-size: 0.8rem;
+    }
+
+    #selected-theme {
+        font-size: 2rem;
+    }
+
+    .divider {
+        width: 48px;
+        height: 4px;
+    }
+
+    #question-display {
+        font-size: 1.1rem;
+        line-height: 1.75;
+        text-align: center;
+    }
+
+    .hint {
+        font-size: 0.85rem;
+        text-align: center;
+    }
 }
