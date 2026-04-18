@@ -11,7 +11,7 @@
     100% { box-shadow: 0 0 0 5px #333, 0 0 0 15px rgb(204, 60, 60), 0 0 0 18px #111; }
 }
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(8px); }
+    from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -28,25 +28,24 @@ body {
     align-items: center;
     min-height: 100vh;
     background: #2a2a2a;
-    padding: 16px;
+    padding: 40px 20px;
     transition: background 0.6s ease;
 }
 
-/* ── Layout principal : roue + question côte à côte ── */
+/* ── Layout : toujours en colonne, centré ── */
 .page-wrapper {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 48px;
+    gap: 40px;
     width: 100%;
-    max-width: 900px;
+    max-width: 620px;
 }
 
 /* ── Roue ── */
 .container {
     position: relative;
-    --wheel-size: clamp(260px, 42vw, 380px);
+    --wheel-size: clamp(240px, 55vw, 420px);
     width:  var(--wheel-size);
     height: var(--wheel-size);
     flex-shrink: 0;
@@ -123,33 +122,34 @@ body {
 .container .wheel .number span {
     position: relative;
     transform: rotate(45deg);
-    font-size: clamp(0.48em, 1.5vw, 0.9em);
+    font-size: clamp(0.5em, 1.4vw, 0.9em);
     font-weight: 700;
     color: rgba(20, 18, 18, 0.85);
     text-shadow: 1px 1px 2px rgba(255,255,255,0.35);
     white-space: nowrap;
 }
 
-/* ── Zone question ── */
+/* ── Zone question : toujours sous la roue, centrée ── */
 .question-container {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
 }
 
 .theme-label {
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     color: rgba(255,255,255,0.35);
 }
 
 #selected-theme {
     display: block;
-    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
     font-weight: 800;
     color: #fff;
     line-height: 1.1;
@@ -157,80 +157,24 @@ body {
 }
 
 .divider {
-    width: 36px;
-    height: 3px;
-    background: rgba(255,255,255,0.18);
+    width: 44px;
+    height: 4px;
+    background: rgba(255,255,255,0.2);
     border-radius: 2px;
 }
 
 #question-display {
-    font-size: clamp(0.88rem, 1.7vw, 1.05rem);
-    line-height: 1.7;
-    color: rgba(255,255,255,0.7);
-    min-height: 50px;
+    font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+    line-height: 1.75;
+    color: rgba(255,255,255,0.82);
+    max-width: 520px;
 }
 
 #question-display p { animation: fadeInUp 0.4s ease; }
 #question-display strong { font-weight: 600; color: #fff; }
 
 .hint {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: rgba(255,255,255,0.22);
     font-style: italic;
-    margin-top: 4px;
-}
-
-/* ── Mobile : roue en haut, texte en dessous, tout visible ── */
-@media (max-width: 640px) {
-    body {
-        align-items: flex-start;
-        justify-content: flex-start;
-        min-height: 100vh;
-        padding: 20px 20px 40px;
-    }
-
-    .page-wrapper {
-        flex-direction: column;
-        align-items: center;
-        gap: 28px;
-        width: 100%;
-    }
-
-    .container {
-        --wheel-size: min(55vw, 240px);
-    }
-
-    .container .wheel .number span {
-        font-size: clamp(0.38em, 2.2vw, 0.6em);
-    }
-
-    .question-container {
-        width: 100%;
-        align-items: center;
-        text-align: center;
-        gap: 10px;
-    }
-
-    .theme-label   { font-size: 0.8rem; }
-
-    #selected-theme {
-        font-size: 1.9rem;
-    }
-
-    .divider {
-        width: 44px;
-        height: 4px;
-    }
-
-    #question-display {
-        font-size: 1.15rem;
-        line-height: 1.75;
-        text-align: center;
-        color: rgba(255,255,255,0.85);
-    }
-
-    .hint {
-        font-size: 0.85rem;
-        text-align: center;
-    }
 }
