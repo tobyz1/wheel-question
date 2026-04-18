@@ -1,15 +1,18 @@
-@import url('https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
  
 @keyframes blink {
     0%   { background-color: rgb(204, 60, 60); }
     50%  { background-color: #fff; }
     100% { background-color: rgb(204, 60, 60); }
 }
- 
 @keyframes shadowBlink {
     0%   { box-shadow: 0 0 0 5px #333, 0 0 0 15px rgb(204, 60, 60), 0 0 0 18px #111; }
     50%  { box-shadow: 0 0 0 5px #333, 0 0 0 15px #fff,              0 0 0 18px #111; }
     100% { box-shadow: 0 0 0 5px #333, 0 0 0 15px rgb(204, 60, 60), 0 0 0 18px #111; }
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
  
 * {
@@ -24,29 +27,28 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: #333;
-    /* allow scrolling on very small screens */
-    overflow-x: hidden;
+    background: #2a2a2a;
+    padding: 16px;
+    transition: background 0.6s ease;
 }
  
-/* ─── Wrapper : roue + question côte à côte sur grand écran ─── */
+/* ── Layout principal : roue + question côte à côte ── */
 .page-wrapper {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 40px;
-    padding: 40px 20px;
+    gap: 48px;
     width: 100%;
-    max-width: 960px;
+    max-width: 900px;
 }
  
-/* ─── Roue ─── */
+/* ── Roue ── */
 .container {
     position: relative;
-    /* taille fluide : 80vw jusqu'à 400px */
-    width:  min(80vw, 400px);
-    height: min(80vw, 400px);
+    --wheel-size: clamp(260px, 42vw, 380px);
+    width:  var(--wheel-size);
+    height: var(--wheel-size);
     flex-shrink: 0;
     display: flex;
     justify-content: center;
@@ -55,29 +57,32 @@ body {
  
 .container .spinBtn {
     position: absolute;
-    width: 60px;
-    height: 60px;
-    background: rgba(0,0,0,0.75);
+    width: 56px;
+    height: 56px;
+    background: rgba(10, 10, 10, 0.85);
     border-radius: 50%;
     z-index: 10;
     display: flex;
     justify-content: center;
     align-items: center;
     text-transform: uppercase;
-    font-weight: 600;
-    color: rgb(212, 212, 212);
-    letter-spacing: 0.1em;
-    border: 4px solid rgba(0,0,0,0.75);
+    font-weight: 700;
+    font-size: 0.62em;
+    color: #e0e0e0;
+    letter-spacing: 0.08em;
+    border: 3px solid rgba(255,255,255,0.12);
     cursor: pointer;
     user-select: none;
+    transition: transform 0.15s ease;
 }
+.container .spinBtn:hover { transform: scale(1.09); }
  
 .container .spinBtn::before {
     content: '';
     position: absolute;
-    top: -28px;
-    width: 20px;
-    height: 35px;
+    top: -26px;
+    width: 18px;
+    height: 32px;
     background: #fff;
     clip-path: polygon(50% 0, 0 100%, 100% 100%);
 }
@@ -87,26 +92,23 @@ body {
  
 .container .wheel {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background: #333;
     border-radius: 50%;
     overflow: hidden;
     box-shadow: 0 0 0 5px #333,
                 0 0 0 15px #fff,
-                0 0 0 18px #111;
+                0 0 0 18px #111,
+                0 8px 40px rgba(0,0,0,0.4);
     transition: transform 5s ease-in-out;
-    transform: rotate(0deg);
 }
  
 .blinkaaa { animation: shadowBlink 0.5s infinite; }
  
 .container .wheel .number {
     position: absolute;
-    width: 50%;
-    height: 50%;
+    width: 50%; height: 50%;
     background: var(--clr);
     transform-origin: bottom right;
     transform: rotate(calc(30deg * var(--i)));
@@ -121,50 +123,87 @@ body {
 .container .wheel .number span {
     position: relative;
     transform: rotate(45deg);
-    font-size: clamp(0.55em, 1.8vw, 1.1em);
+    font-size: clamp(0.48em, 1.5vw, 0.9em);
     font-weight: 700;
-    color: rgba(17, 15, 15, 0.856);
-    text-shadow: 3px 2px 2px rgba(173, 173, 173, 0.75);
+    color: rgba(20, 18, 18, 0.85);
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.35);
+    white-space: nowrap;
 }
  
-/* ─── Zone question ─── */
+/* ── Zone question ── */
 .question-container {
     flex: 1;
-    min-width: 0;          /* évite le débordement flex */
-    text-align: left;
-    color: #fff;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
  
-.question-container h2 {
-    font-size: clamp(1.2rem, 4vw, 1.8rem);
-    margin-bottom: 12px;
+.theme-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(255,255,255,0.35);
+}
+ 
+#selected-theme {
+    display: block;
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+ 
+.divider {
+    width: 36px;
+    height: 3px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 2px;
 }
  
 #question-display {
-    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-    line-height: 1.6;
+    font-size: clamp(0.88rem, 1.7vw, 1.05rem);
+    line-height: 1.7;
+    color: rgba(255,255,255,0.7);
+    min-height: 50px;
 }
  
-/* ─── Responsive : empilement vertical sur mobile ─── */
-@media (max-width: 600px) {
-    .page-wrapper {
-        flex-direction: column;
-        gap: 30px;
-        padding: 30px 16px;
+#question-display p { animation: fadeInUp 0.4s ease; }
+#question-display strong { font-weight: 600; color: #fff; }
+ 
+.hint {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.22);
+    font-style: italic;
+    margin-top: 4px;
+}
+ 
+/* ── Mobile : colonne compacte ── */
+@media (max-width: 640px) {
+    body {
+        align-items: flex-start;
+        padding: 24px 16px 32px;
     }
  
-    /* Roue un peu plus petite sur très petits écrans */
+    .page-wrapper {
+        flex-direction: column;
+        align-items: center;
+        gap: 28px;
+    }
+ 
     .container {
-        width:  min(90vw, 320px);
-        height: min(90vw, 320px);
+        --wheel-size: min(84vw, 310px);
     }
  
     .question-container {
-        text-align: center;
         width: 100%;
+        align-items: center;
+        text-align: center;
+        gap: 8px;
     }
  
-    #question-display {
-        text-align: center;
-    }
+    #question-display { text-align: center; }
+    .hint             { text-align: center; }
 }
