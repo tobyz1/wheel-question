@@ -1,230 +1,221 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
- 
-@keyframes blink {
-    0%   { background-color: rgb(204, 60, 60); }
-    50%  { background-color: #fff; }
-    100% { background-color: rgb(204, 60, 60); }
-}
-@keyframes shadowBlink {
-    0%   { box-shadow: 0 0 0 5px #333, 0 0 0 15px rgb(204, 60, 60), 0 0 0 18px #111; }
-    50%  { box-shadow: 0 0 0 5px #333, 0 0 0 15px #fff,              0 0 0 18px #111; }
-    100% { box-shadow: 0 0 0 5px #333, 0 0 0 15px rgb(204, 60, 60), 0 0 0 18px #111; }
-}
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
- 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
- 
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: #2a2a2a;
-    padding: 16px;
-    transition: background 0.6s ease;
-}
- 
-/* ── Layout principal : roue + question côte à côte ── */
-.page-wrapper {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 48px;
-    width: 100%;
-    max-width: 900px;
-}
- 
-/* ── Roue ── */
-.container {
-    position: relative;
-    --wheel-size: clamp(260px, 42vw, 380px);
-    width:  var(--wheel-size);
-    height: var(--wheel-size);
-    flex-shrink: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
- 
-.container .spinBtn {
-    position: absolute;
-    width: 56px;
-    height: 56px;
-    background: rgba(10, 10, 10, 0.85);
-    border-radius: 50%;
-    z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-transform: uppercase;
-    font-weight: 700;
-    font-size: 0.62em;
-    color: #e0e0e0;
-    letter-spacing: 0.08em;
-    border: 3px solid rgba(255,255,255,0.12);
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.15s ease;
-}
-.container .spinBtn:hover { transform: scale(1.09); }
- 
-.container .spinBtn::before {
-    content: '';
-    position: absolute;
-    top: -26px;
-    width: 18px;
-    height: 32px;
-    background: #fff;
-    clip-path: polygon(50% 0, 0 100%, 100% 100%);
-}
- 
-.blinking::before { animation: blink 0.5s infinite; }
-.blinking         { animation: blink 0.5s infinite; }
- 
-.container .wheel {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: #333;
-    border-radius: 50%;
-    overflow: hidden;
-    box-shadow: 0 0 0 5px #333,
-                0 0 0 15px #fff,
-                0 0 0 18px #111,
-                0 8px 40px rgba(0,0,0,0.4);
-    transition: transform 5s ease-in-out;
-}
- 
-.blinkaaa { animation: shadowBlink 0.5s infinite; }
- 
-.container .wheel .number {
-    position: absolute;
-    width: 50%; height: 50%;
-    background: var(--clr);
-    transform-origin: bottom right;
-    transform: rotate(calc(30deg * var(--i)));
-    clip-path: polygon(0 0, 45% 0, 100% 100%, 0 39%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    user-select: none;
-    cursor: pointer;
-}
- 
-.container .wheel .number span {
-    position: relative;
-    transform: rotate(45deg);
-    font-size: clamp(0.48em, 1.5vw, 0.9em);
-    font-weight: 700;
-    color: rgba(20, 18, 18, 0.85);
-    text-shadow: 1px 1px 2px rgba(255,255,255,0.35);
-    white-space: nowrap;
-}
- 
-/* ── Zone question ── */
-.question-container {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
- 
-.theme-label {
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: rgba(255,255,255,0.35);
-}
- 
-#selected-theme {
-    display: block;
-    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-    font-weight: 800;
-    color: #fff;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-}
- 
-.divider {
-    width: 36px;
-    height: 3px;
-    background: rgba(255,255,255,0.18);
-    border-radius: 2px;
-}
- 
-#question-display {
-    font-size: clamp(0.88rem, 1.7vw, 1.05rem);
-    line-height: 1.7;
-    color: rgba(255,255,255,0.7);
-    min-height: 50px;
-}
- 
-#question-display p { animation: fadeInUp 0.4s ease; }
-#question-display strong { font-weight: 600; color: #fff; }
- 
-.hint {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.22);
-    font-style: italic;
-    margin-top: 4px;
-}
- 
-/* ── Mobile : colonne compacte ── */
-@media (max-width: 640px) {
-    body {
-        align-items: flex-start;
-        padding: 24px 16px 40px;
-    }
- 
-    .page-wrapper {
-        flex-direction: column;
-        align-items: center;
-        gap: 32px;
-    }
- 
-    .container {
-        --wheel-size: min(84vw, 310px);
-    }
- 
-    .question-container {
-        width: 100%;
-        align-items: center;
-        text-align: center;
-        gap: 12px;
-    }
- 
-    .theme-label {
-        font-size: 0.8rem;
-    }
- 
-    #selected-theme {
-        font-size: 2rem;
-    }
- 
-    .divider {
-        width: 48px;
-        height: 4px;
-    }
- 
-    #question-display {
-        font-size: 1.1rem;
-        line-height: 1.75;
-        text-align: center;
-    }
- 
-    .hint {
-        font-size: 0.85rem;
-        text-align: center;
-    }
-}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Roue des Questions</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+
+        <!-- Roue -->
+        <div class="container">
+            <div class="spinBtn">spin</div>
+            <div class="wheel">
+                <div class="number" style="--i:1;--clr:#7fbeb4;"><span>Souvenirs</span></div>
+                <div class="number" style="--i:2;--clr:#ffffb3;"><span>Perception</span></div>
+                <div class="number" style="--i:3;--clr:#bebada;"><span>Avenir</span></div>
+                <div class="number" style="--i:4;--clr:#fb8072;"><span>Amitiés</span></div>
+                <div class="number" style="--i:5;--clr:#80b1d3;"><span>Famille</span></div>
+                <div class="number" style="--i:6;--clr:#fdb462;"><span>Amour</span></div>
+                <div class="number" style="--i:7;--clr:#b3de69;"><span>Travail</span></div>
+                <div class="number" style="--i:8;--clr:#fccde5;"><span>Malaises</span></div>
+                <div class="number" style="--i:9;--clr:#d9d9d9;"><span>Croyances</span></div>
+                <div class="number" style="--i:10;--clr:#bc80bd;"><span>Conflits</span></div>
+                <div class="number" style="--i:11;--clr:#ccebc5;"><span>Expériences</span></div>
+                <div class="number" style="--i:12;--clr:#ffed6f;"><span>Loisirs</span></div>
+            </div>
+        </div>
+
+        <!-- Question -->
+        <div class="question-container">
+            <span class="theme-label">Thème</span>
+            <span id="selected-theme">—</span>
+            <div class="divider"></div>
+            <div id="question-display">
+                <p><strong>Faites tourner la roue pour découvrir une question.</strong></p>
+            </div>
+            <p class="hint">Appuyez sur SPIN pour commencer</p>
+        </div>
+
+    </div>
+
+    <script>
+        const themesQuestions = {
+            "Souvenirs": [
+                "Quel est ton premier souvenir ?",
+                "Est-ce que tu étais plutôt boloss ou populaire au collège ?",
+                "En quatre minutes, racontez votre vie de la façon la plus détaillée possible.",
+                "Ta plus grande douleur physique ?",
+                "Quel est votre souvenir le plus précieux ?",
+                "Quel est votre plus terrible souvenir ?",
+                "Quel est le truc que tu faisais ado dont tu as honte aujourd'hui ?",
+                "Raconte ta pire galère de soirée, celle dont tu te souviendras toujours.",
+                "As-tu déjà vécu une expérience paranormale ?",
+                "As-tu déjà été viré·e de cours ou pris une heure de colle ? Si oui, pourquoi ?",
+                "Quelle est la dernière chose qui t'a fait pleurer ?",
+                "Qu'est-ce que votre jeune moi ne croirait pas à propos de votre vie d'aujourd'hui ?",
+                "Quel est votre meilleur souvenir d'enfance ?",
+                "Quelle est l'action que vous regrettez le plus ?",
+                "Quel est votre plus grand regret ?",
+            ],
+            "Perception": [
+                "Est-ce que tu aimes bien ton visage ?",
+                "Est-ce que tu aimes bien ton nom ?",
+                "Si vous pouviez vous réveiller demain avec une qualité de plus, que serait-ce ?",
+                "Pensez-vous que vous êtes extraverti(e) ?",
+                "C'est quoi ton rythme de vie (lève-tôt, couche-tard, etc.) ?",
+                "Pensez-vous que vous êtes une personne froide ?",
+                "As-tu déjà remarqué une particularité physique étonnante chez toi ?",
+                "Avez-vous un talent caché ?",
+                "Donne cinq mots pour te décrire.",
+                "Quel compliment t'a le plus marqué ?",
+                "Nomme une chose que tu aimes chez toi.",
+                "Qu'est-ce que les gens pensent à tort de toi ?",
+                "En quoi êtes-vous meilleur(e) que la plupart des gens que vous connaissez ?",
+                "Qu'est-ce qui vous a surpris chez vous-même ?",
+                "À votre avis, quel est votre super pouvoir ?",
+                "Comment vous décririez-vous à un inconnu ?",
+            ],
+            "Avenir": [
+                "Si une boule de cristal pouvait vous dire la vérité sur votre avenir, que voudriez-vous savoir ?",
+                "Y a-t-il quelque chose que vous avez rêvé de faire depuis longtemps ? Pourquoi ne l'avez-vous pas encore réalisé ?",
+                "Quel est le plus grand accomplissement de votre vie ?",
+                "Si vous appreniez que vous mourriez dans un an, changeriez-vous votre vie ?",
+                "As-tu une bucket list ?",
+                "Si tu avais tout l'argent du monde, tu achèterais quoi ?",
+                "À quelle question essayez-vous de répondre dans votre vie en ce moment ?",
+                "Que diriez-vous à votre moi plus jeune ?",
+                "Pensez-vous que le pays dans lequel vous vivez est celui qui vous convient le mieux ?",
+            ],
+            "Amitiés": [
+                "Qu'est-ce que vous appréciez le plus dans une amitié ?",
+                "Que signifie l'amitié pour vous ?",
+                "Quelle est la chose la plus gentille que vous vous souvenez avoir faite pour un ami ?",
+                "Quel est le plus beau cadeau que tes amis t'aient offert ?",
+                "Quel est le pire cadeau que tes amis t'aient offert ?",
+                "Quel est ton plus beau souvenir entre amis ?",
+                "Quelle est la remarque la plus vexante qu'un ami t'ait faite ?",
+                "As-tu déjà menti à tes amis ?",
+                "Quelle est la pire chose que puisse te faire un ami ?",
+                "Quelles sont les qualités indispensables pour être ton ami ?",
+            ],
+            "Famille": [
+                "Quel est votre surnom de famille le plus embarrassant ?",
+                "Quelle est la tradition familiale que vous chérissez le plus ?",
+                "Quel membre de ta famille te ressemble le plus ?",
+                "Quelle est la leçon la plus importante que tes parents t'ont apprise ?",
+                "Si tu pouvais choisir ta famille, est-ce que tu garderais la même ?",
+                "Quel secret de famille tout le monde connaît mais dont on ne parle jamais ?",
+            ],
+            "Amour": [
+                "Quelle est la chose la plus romantique que quelqu'un ait faite pour toi ?",
+                "Quel est ton love language ?",
+                "As-tu déjà été amoureux·se sans le dire ?",
+                "Quelle qualité cherches-tu absolument chez un·e partenaire ?",
+                "Crois-tu au coup de foudre ?",
+                "Quelle est la pire rupture que tu aies vécue ?",
+            ],
+            "Travail": [
+                "Quel est ton pire souvenir au travail ?",
+                "Si tu pouvais changer de métier demain, tu ferais quoi ?",
+                "Qu'est-ce qui te motive vraiment dans ton travail ?",
+                "As-tu déjà pris un congé maladie sans vraiment être malade ?",
+                "Quel collègue t'a le plus marqué·e, en bien ou en mal ?",
+            ],
+            "Malaises": [
+                "Quelle est la situation la plus gênante que tu aies vécue ?",
+                "As-tu déjà envoyé un message à la mauvaise personne ?",
+                "Quel est le mensonge dont tu as le plus honte ?",
+                "As-tu déjà fait semblant de ne pas voir quelqu'un pour l'éviter ?",
+                "Quelle est la chose la plus embarrassante que tu aies faite en public ?",
+            ],
+            "Croyances": [
+                "Crois-tu en la vie après la mort ?",
+                "Quelle est ta superstition la plus irrationnelle ?",
+                "As-tu déjà eu un signe qui t'a semblé venir d'ailleurs ?",
+                "En quoi crois-tu vraiment, même si c'est difficile à expliquer ?",
+                "Pensez-vous que des extraterrestres puissent exister ?",
+            ],
+            "Conflits": [
+                "Quelle est la dispute dont tu es le plus fier·e d'être sorti·e ?",
+                "As-tu déjà coupé les ponts avec quelqu'un ? Pourquoi ?",
+                "Comment réagis-tu quand quelqu'un te blesse ?",
+                "Si tu pouvais avoir le dernier mot dans un conflit passé, que dirais-tu ?",
+                "Qu'est-ce qui te met vraiment en colère ?",
+                "Pouvez-vous tolérer quelqu'un qui vous a fait du mal ?",
+            ],
+            "Expériences": [
+                "Si tu pouvais voyager dans le temps pour assister à UN événement passé, ce serait quoi ?",
+                "Quel est l'endroit où tu t'es senti·e le plus à l'aise et détendu·e ?",
+                "Si tu pouvais voir n'importe quel·le artiste en concert, mort ou vivant, qui choisirais-tu ?",
+                "Vous considérez-vous comme un preneur de risques ?",
+                "Avez-vous déjà vécu une expérience de mort imminente ?",
+                "Quel a été ton plus beau voyage ?",
+                "Quel risque es-tu content·e d'avoir pris ?",
+                "Quelle est la plus belle chose que tu aies vue dans ta vie ?",
+                "D'après vous, quelle chose devrait-on absolument expérimenter au moins une fois dans sa vie ?",
+            ],
+            "Loisirs": [
+                "Qu'est-ce qui constituerait une journée parfaite pour vous ?",
+                "C'est quoi ton gros mot préféré ?",
+                "Qu'est-ce que vous regardez/écoutez/lisez en boucle ces derniers temps ?",
+                "Si tu ne pouvais plus regarder qu'un seul film, ce serait lequel ?",
+                "Quelle émission télé nulle pourrais-tu regarder pendant des heures ?",
+                "Quel aliment aimerais-tu pouvoir manger sans limite sans risque pour ta santé ?",
+                "Tu préférerais ne plus jamais aller au cinéma ou ne plus jamais aller à un concert ?",
+                "Quel est le jeu dont tu ne pourrais jamais te lasser ?",
+                "Es-tu plus sucré ou salé ?",
+                "Quelle est ta destination voyage de rêve ?",
+                "Quel artiste musical écoutes-tu le plus souvent ?",
+            ]
+        };
+
+        const wheel   = document.querySelector('.wheel');
+        const spinBtn = document.querySelector('.spinBtn');
+        const hint    = document.querySelector('.hint');
+        let value = Math.ceil(Math.random() * 3600);
+
+        spinBtn.onclick = function () {
+            value += Math.ceil(Math.random() * 3600);
+            wheel.style.transform = "rotate(" + value + "deg)";
+            spinBtn.classList.add("blinking");
+            wheel.classList.add("blinkaaa");
+            hint.style.opacity = '0';
+        };
+
+        wheel.addEventListener("transitionend", function () {
+            const actualRotation = value % 360;
+            const sectionIndex   = Math.floor(actualRotation / 30) % 12;
+            const themeList = ["Souvenirs","Perception","Avenir","Amitiés","Famille","Amour","Travail","Malaises","Croyances","Conflits","Expériences","Loisirs"];
+            const selectedSection = document.querySelector(`.wheel .number:nth-child(${12 - sectionIndex + 1})`);
+            const selectedTheme   = themeList[selectedSection.style.getPropertyValue("--i") - 1];
+            const selectedColor   = getComputedStyle(selectedSection).getPropertyValue('--clr');
+
+            document.body.style.background = shadeColor(selectedColor, -55);
+            document.getElementById("selected-theme").textContent = selectedTheme;
+
+            spinBtn.classList.remove("blinking");
+            wheel.classList.remove("blinkaaa");
+
+            const questions    = themesQuestions[selectedTheme] || [];
+            const randomQ      = questions[Math.floor(Math.random() * questions.length)];
+            document.getElementById("question-display").innerHTML =
+                `<p><strong>${randomQ}</strong></p>`;
+        });
+
+        /* Assombrit la couleur de fond pour un rendu plus élégant */
+        function shadeColor(hex, percent) {
+            hex = hex.trim();
+            let r = parseInt(hex.slice(1,3),16);
+            let g = parseInt(hex.slice(3,5),16);
+            let b = parseInt(hex.slice(5,7),16);
+            r = Math.max(0, Math.min(255, r + percent));
+            g = Math.max(0, Math.min(255, g + percent));
+            b = Math.max(0, Math.min(255, b + percent));
+            return `rgb(${r},${g},${b})`;
+        }
+    </script>
+</body>
+</html>
