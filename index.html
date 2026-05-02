@@ -1113,37 +1113,38 @@ body {
 
         /* ── Rendu des étoiles ── */
         async function renderStars(q) {
-            const data = await getQuestionData(q);
-            const avg = data.avg;
-            const stars = document.querySelectorAll('.star');
-            const filled = avg ? Math.round(avg) : 0;
+    const data = await getQuestionData(q);
+    const avg = data.avg;
+    const stars = document.querySelectorAll('.star');
+    const filled = (avg !== null && avg !== undefined) ? Math.round(avg) : 0;
 
-            stars.forEach((s, i) => {
-                // Icône pleine ou vide
-                s.textContent = (i < filled) ? '\u2605' : '\u2606';
-                s.classList.toggle('lit', i < filled);
+    stars.forEach((s, i) => {
+        s.textContent = (i < filled) ? '\u2605' : '\u2606';
+        s.classList.toggle('lit', i < filled);
 
-                s.onclick = () => {
-                    saveRating(q, parseInt(s.dataset.v));
-                    renderStars(q);
-                };
-                s.onmouseover = () => {
-                    stars.forEach((ss, ii) => {
-                        ss.textContent = (ii <= i) ? '\u2605' : '\u2606';
-                        ss.classList.toggle('lit', ii <= i);
-                    });
-                };
-                s.onmouseleave = () => renderStars(q);
+        s.onclick = async () => {
+            await saveRating(q, parseInt(s.dataset.v));
+            await renderStars(q);
+        };
+
+        s.onmouseover = () => {
+            stars.forEach((ss, ii) => {
+                ss.textContent = (ii <= i) ? '\u2605' : '\u2606';
+                ss.classList.toggle('lit', ii <= i);
             });
+        };
 
-            const avgEl = document.getElementById('avg-rating');
-            const r = getRatings()[q];
-            if (r && r.count > 0) {
-                avgEl.textContent = 'Moyenne : ' + (r.sum/r.count).toFixed(1) + ' \u2605  (' + r.count + ' vote' + (r.count>1?'s':'') + ')';
-            } else {
-                avgEl.textContent = 'Pas encore noté';
-            }
-        }
+        s.onmouseleave = () => renderStars(q);
+    });
+
+    const avgEl = document.getElementById('avg-rating');
+
+    if (data.count > 0) {
+        avgEl.textContent = 'Moyenne : ' + data.avg.toFixed(1) + ' ★ (' + data.count + ' vote' + (data.count > 1 ? 's' : '') + ')';
+    } else {
+        avgEl.textContent = 'Pas encore noté';
+    }
+}
 
         /* ── Affichage d'une question ── */
         async function showQuestion(q) {
