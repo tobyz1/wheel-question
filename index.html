@@ -1152,7 +1152,7 @@ body {
 
     await markQuestionAsked(q); // 🔥 AJOUT IMPORTANT
 
-    renderStars(q);
+    await renderStars(q);
     showUI();
     if (previousQuestion) showBack(); else hideBack();
 }
