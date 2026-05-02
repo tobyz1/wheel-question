@@ -721,7 +721,7 @@
   <!-- Firebase -->
   <script type="module">
     import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged }
                                       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc,
              onSnapshot, query, where, orderBy, serverTimestamp, getDocs }
@@ -786,13 +786,21 @@
 
     // ── AUTH ──
     signinBtn.addEventListener('click', async () => {
-      const provider = new GoogleAuthProvider();
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (e) {
-        showToast('Erreur de connexion', 'error');
-      }
-    });
+  const provider = new GoogleAuthProvider();
+  try {
+    await signInWithRedirect(auth, provider);
+  } catch (e) {
+    showToast('Erreur de connexion', 'error');
+  }
+});
+
+getRedirectResult(auth).then((result) => {
+  // connexion gérée par onAuthStateChanged
+}).catch((e) => {
+  if (e.code && e.code !== 'auth/null-user') {
+    showToast('Erreur : ' + e.message, 'error');
+  }
+});
 
     logoutBtn.addEventListener('click', () => signOut(auth));
 
