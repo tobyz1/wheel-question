@@ -280,6 +280,78 @@ body {
 #carousel-indicator.visible {
     display: inline-block;
 }
+
+#suggestion-btn {
+    margin-top: 6px;
+    padding: 9px 18px;
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#suggestion-panel {
+    display: none;
+    width: min(520px, 92vw);
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.2);
+    text-align: left;
+}
+
+#suggestion-panel.visible {
+    display: block;
+}
+
+.suggestion-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+#suggestion-theme,
+#suggestion-text {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+}
+
+#suggestion-text {
+    min-height: 90px;
+    resize: vertical;
+}
+
+#suggestion-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.suggestion-action {
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    cursor: pointer;
+}
+
+#suggestion-feedback {
+    margin-top: 8px;
+    min-height: 1.2em;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.84rem;
+}
     </style>
 </head>
 <body>
@@ -334,6 +406,22 @@ body {
             <div id="carousel-indicator">0 / 0</div>
 
             <p class="hint">Appuyez sur SPIN pour commencer</p>
+            <button id="suggestion-btn" type="button">Ajouter une question</button>
+            <div id="suggestion-panel">
+                <div class="suggestion-row">
+                    <label for="suggestion-theme">Theme</label>
+                    <select id="suggestion-theme"></select>
+                </div>
+                <div class="suggestion-row">
+                    <label for="suggestion-text">Question a proposer</label>
+                    <textarea id="suggestion-text" maxlength="300"></textarea>
+                </div>
+                <div id="suggestion-actions">
+                    <button id="suggestion-cancel" class="suggestion-action" type="button">Annuler</button>
+                    <button id="suggestion-submit" class="suggestion-action" type="button">Envoyer en validation</button>
+                </div>
+                <div id="suggestion-feedback"></div>
+            </div>
         </div>
 
     </div>
@@ -1004,6 +1092,7 @@ body {
   const wheel = document.querySelector('.wheel');
   const spinBtn = document.querySelector('.spinBtn');
   const hint = document.querySelector('.hint');
+  const themeList = ["Souvenirs", "Perception", "Avenir", "Amitiés", "Famille", "Amour", "Travail", "Malaises", "Croyances", "Conflits", "Expériences", "Loisirs"];
   let value = Math.ceil(Math.random() * 3600);
 
   let currentTheme = null;
@@ -1019,6 +1108,13 @@ body {
   const btnBack = document.getElementById('btn-back');
   const btnSkip = document.getElementById('btn-skip');
   const carouselIndicator = document.getElementById('carousel-indicator');
+  const suggestionBtn = document.getElementById('suggestion-btn');
+  const suggestionPanel = document.getElementById('suggestion-panel');
+  const suggestionTheme = document.getElementById('suggestion-theme');
+  const suggestionText = document.getElementById('suggestion-text');
+  const suggestionCancel = document.getElementById('suggestion-cancel');
+  const suggestionSubmit = document.getElementById('suggestion-submit');
+  const suggestionFeedback = document.getElementById('suggestion-feedback');
 
   function showUI() { 
     ratingEl.classList.add('visible'); 
@@ -1100,16 +1196,77 @@ body {
     return credential.user;
   }
 
+  function setSuggestionFeedback(message, isError = false) {
+    suggestionFeedback.textContent = message;
+    suggestionFeedback.style.color = isError ? 'rgba(255,170,170,0.95)' : 'rgba(180,255,200,0.95)';
+  }
+
+  function openSuggestionPanel() {
+    if (currentTheme) suggestionTheme.value = currentTheme;
+    suggestionPanel.classList.add('visible');
+    suggestionText.focus();
+  }
+
+  function closeSuggestionPanel() {
+    suggestionPanel.classList.remove('visible');
+    suggestionText.value = '';
+    suggestionFeedback.textContent = '';
+  }
+
+  async function submitQuestionSuggestion() {
+    const theme = suggestionTheme.value;
+    const text = suggestionText.value.trim();
+
+    if (!theme || !text) {
+      setSuggestionFeedback('Completer le theme et la question.', true);
+      return;
+    }
+    if (text.length < 8) {
+      setSuggestionFeedback('La question est trop courte.', true);
+      return;
+    }
+
+    const shouldSubmit = window.confirm(
+      'Cette question sera envoyee en attente de validation avant ajout dans la base finale. Continuer ?'
+    );
+    if (!shouldSubmit) return;
+
+    try {
+      suggestionSubmit.disabled = true;
+      await ensureSignedIn();
+      await db.collection('questionSubmissions').add({
+        theme: theme,
+        text: text,
+        status: 'pending',
+        createdBy: signedInUserId,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      setSuggestionFeedback('Question envoyee en validation.');
+      setTimeout(closeSuggestionPanel, 900);
+    } catch (error) {
+      console.error('Erreur soumission question:', error);
+      setSuggestionFeedback('Echec de soumission. Verifie les regles Firestore.', true);
+    } finally {
+      suggestionSubmit.disabled = false;
+    }
+  }
+
   // Firestore SDK functions (global shared ratings)
   async function saveRating(q, note) {
     try {
       await ensureSignedIn();
       const docId = encodeQuestionDocId(q);
+      const statRef = db.collection('questionStats').doc(docId);
       const voteRef = db
         .collection('questionStats')
         .doc(docId)
         .collection('votes')
         .doc(signedInUserId);
+
+      await statRef.set({
+        question: q,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
 
       await voteRef.set({
         value: note,
@@ -1310,7 +1467,6 @@ body {
   wheel.addEventListener('transitionend', async function () {
     const actualRotation = value % 360;
     const sectionIndex = Math.floor(actualRotation / 30) % 12;
-    const themeList = ["Souvenirs", "Perception", "Avenir", "Amitiés", "Famille", "Amour", "Travail", "Malaises", "Croyances", "Conflits", "Expériences", "Loisirs"];
     const selectedSection = document.querySelector('.wheel .number:nth-child(' + (12 - sectionIndex + 1) + ')');
     const selectedTheme = themeList[parseInt(selectedSection.style.getPropertyValue('--i')) - 1];
     const selectedColor = getComputedStyle(selectedSection).getPropertyValue('--clr');
@@ -1350,6 +1506,18 @@ body {
     b = Math.max(0, Math.min(255, b + percent));
     return 'rgb(' + r + ',' + g + ',' + b + ')';
   }
+
+  themeList.forEach((theme) => {
+    const option = document.createElement('option');
+    option.value = theme;
+    option.textContent = theme;
+    suggestionTheme.appendChild(option);
+  });
+  suggestionTheme.value = themeList[0];
+
+  suggestionBtn.addEventListener('click', openSuggestionPanel);
+  suggestionCancel.addEventListener('click', closeSuggestionPanel);
+  suggestionSubmit.addEventListener('click', submitQuestionSuggestion);
 
   hideBack();
   updateCarouselIndicator();
