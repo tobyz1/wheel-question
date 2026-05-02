@@ -179,3 +179,88 @@ body {
     color: rgba(255,255,255,0.22);
     font-style: italic;
 }
+
+/* ── Notation par étoiles ── */
+#rating-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    animation: fadeInUp 0.4s ease;
+}
+
+.rating-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.35);
+}
+
+#stars {
+    display: flex;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.star {
+    font-size: clamp(1.6rem, 5vw, 2rem);
+    color: rgba(255,255,255,0.25);
+    transition: color 0.15s ease, transform 0.15s ease;
+    line-height: 1;
+    user-select: none;
+}
+
+.star:hover,
+.star.active {
+    color: #ffd966;
+    transform: scale(1.18);
+}
+
+#avg-rating {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.38);
+    font-style: italic;
+    min-height: 1.2em;
+}
+
+/* ── Boutons navigation (Précédente / Passer) ── */
+#nav-buttons {
+    display: none;
+    flex-direction: row;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeInUp 0.4s ease;
+}
+
+#nav-buttons button {
+    padding: 9px 22px;
+    border-radius: 24px;
+    border: 2px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.75);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    backdrop-filter: blur(4px);
+}
+
+#nav-buttons button:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.4);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+#nav-buttons button:active {
+    transform: translateY(0);
+}
+
+#btn-back[style*="hidden"] {
+    opacity: 0;
+    pointer-events: none;
+}
