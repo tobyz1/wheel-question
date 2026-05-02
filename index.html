@@ -1150,11 +1150,18 @@ body {
     document.getElementById('question-display').innerHTML =
         '<p><strong>' + q + '</strong></p>';
 
-    await markQuestionAsked(q); // 🔥 AJOUT IMPORTANT
+    await markQuestionAsked(q);
 
-    await renderStars(q);
+    try {
+        await renderStars(q);
+    } catch (e) {
+        console.error("Erreur étoiles:", e);
+    }
+
     showUI();
-    if (previousQuestion) showBack(); else hideBack();
+
+    if (previousQuestion) showBack();
+    else hideBack();
 }
         /* ── Skip ── */
         function skipQuestion() {
