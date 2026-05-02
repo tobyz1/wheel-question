@@ -1,0 +1,28 @@
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Secrets — ne jamais commiter
+*.env
+.env
+.env.local
+.env.*.local
+service-account*.json
+*-adminsdk-*.json
+secrets.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (si tu utilises les Firebase CLI tools)
+node_modules/
+package-lock.json

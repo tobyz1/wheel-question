@@ -1,0 +1,106 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─────────────────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+
+    // ─────────────────────────────────────────────────────────
+    // admins/{uid}
+    //   - Lecture : admin seulement (ou soi-même pour vérifier son propre accès)
+    //   - Écriture : personne depuis le client (console Firebase uniquement)
+    // ─────────────────────────────────────────────────────────
+    match /admins/{uid} {
+      allow read:  if isAdmin() || isOwner(uid);
+      allow write: if false;
+    }
+
+
+    // ─────────────────────────────────────────────────────────
+    // questionSubmissions/{submissionId}
+    //
+    //   CREATE  — utilisateur connecté, champs validés, createdBy = son UID
+    //   READ    — admin : toutes | utilisateur : seulement les siennes
+    //   UPDATE  — admin seulement (pour passer status → approved / rejected)
+    //   DELETE  — personne depuis le client
+    // ─────────────────────────────────────────────────────────
+    match /questionSubmissions/{submissionId} {
+
+      allow create: if isSignedIn()
+        && request.resource.data.keys().hasAll(['theme', 'text', 'status', 'createdBy', 'createdAt'])
+        && request.resource.data.status    == 'pending'
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.text      is string
+        && request.resource.data.text.size() >= 10
+        && request.resource.data.text.size() <= 500
+        && request.resource.data.theme     is string
+        && request.resource.data.theme.size() > 0;
+
+      allow read:   if isAdmin() || isOwner(resource.data.createdBy);
+
+      allow update: if isAdmin()
+        // L'admin peut seulement modifier status + champs de décision
+        && request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['status', 'approvedAt', 'approvedBy', 'rejectedAt', 'rejectedBy', 'rejectionReason'])
+        && request.resource.data.status in ['approved', 'rejected'];
+
+      allow delete: if false;
+    }
+
+
+    // ─────────────────────────────────────────────────────────
+    // questions/{theme}/items/{questionId}
+    //   - Lecture    : tout le monde (questions publiques)
+    //   - Écriture   : admin seulement (validation depuis le panneau)
+    // ─────────────────────────────────────────────────────────
+    match /questions/{theme}/items/{questionId} {
+      allow read:   if true;
+      allow write:  if isAdmin();
+    }
+
+
+    // ─────────────────────────────────────────────────────────
+    // questionStats/{questionId}  — votes globaux
+    //   - Lecture : connecté
+    //   - Écriture : connecté (votes)
+    // ─────────────────────────────────────────────────────────
+    match /questionStats/{questionId} {
+      allow read:  if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+
+    // ─────────────────────────────────────────────────────────
+    // notes/{userId}/{noteId}  — notes privées
+    //   - Lecture / Écriture : seulement le propriétaire
+    // ─────────────────────────────────────────────────────────
+    match /notes/{userId}/{noteId} {
+      allow read, write: if isOwner(userId);
+    }
+
+
+    // ─────────────────────────────────────────────────────────
+    // Tout le reste : refusé par défaut
+    // ─────────────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+  }
+}
