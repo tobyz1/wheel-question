@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Roue des Questions</title>
+    <script src="https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js"></script>
     <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
 
@@ -307,7 +309,29 @@ body {
         </div>
 
     </div>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCVxw8U-DvB8YxQv09MlOcy8q5q9vlajDk",
+    authDomain: "roue-des-questions.firebaseapp.com",
+    projectId: "roue-des-questions",
+    storageBucket: "roue-des-questions.firebasestorage.app",
+    messagingSenderId: "297075017743",
+    appId: "1:297075017743:web:0bf54c8d1252c027a8fb7a",
+    measurementId: "G-ZXY1B21J3S"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
     <script>
         const themesQuestions = {
             "Souvenirs": [
@@ -958,7 +982,7 @@ body {
 "D'après ce que vous savez sur vous-même, quel film vous recommandez-vous de regarder ?",
             ]
         };
-
+        
         const wheel   = document.querySelector('.wheel');
         const spinBtn = document.querySelector('.spinBtn');
         const hint    = document.querySelector('.hint');
@@ -999,41 +1023,86 @@ body {
             localStorage.setItem('askedQuestions', JSON.stringify(data));
         }
 
-        /* ── Notation ── */
-        function getRatings() {
-            return JSON.parse(localStorage.getItem('questionRatings') || '{}');
-        }
+        async function saveRating(q, note) {
+    const ref = doc(db, "questions", btoa(q));
+    const snap = await getDoc(ref);
 
-        function saveRating(q, note) {
-            const ratings = getRatings();
-            if (!ratings[q]) ratings[q] = { sum: 0, count: 0 };
-            ratings[q].sum   += note;
-            ratings[q].count += 1;
-            localStorage.setItem('questionRatings', JSON.stringify(ratings));
-        }
+    if (!snap.exists()) {
+        await setDoc(ref, {
+            sum: note,
+            count: 1,
+            asked: 0
+        });
+    } else {
+        const data = snap.data();
+        await updateDoc(ref, {
+            sum: data.sum + note,
+            count: data.count + 1
+        });
+    }
+}
+        async function getQuestionData(q) {
+    const ref = doc(db, "questions", btoa(q));
+    const snap = await getDoc(ref);
 
-        function getAvgRating(q) {
-            const r = getRatings()[q];
-            if (!r || r.count === 0) return null;
-            return r.sum / r.count;
-        }
+    if (!snap.exists()) {
+        return { avg: 3, count: 0, asked: 0 };
+    }
 
+    const data = snap.data();
+
+    return {
+        avg: data.count > 0 ? data.sum / data.count : 3,
+        count: data.count || 0,
+        asked: data.asked || 0
+    };
+}
+        async function markQuestionAsked(q) {
+    const ref = doc(db, "questions", btoa(q));
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+        await setDoc(ref, {
+            sum: 0,
+            count: 0,
+            asked: 1
+        });
+    } else {
+        const data = snap.data();
+        await updateDoc(ref, {
+            asked: (data.asked || 0) + 1
+        });
+    }
+}
         /* ── Tirage pondéré par la note ── */
-        function weightedRandom(questions) {
-            const ratings = getRatings();
-            const weights = questions.map(q => {
-                const r = ratings[q];
-                if (!r || r.count === 0) return 3;
-                return Math.max(0.5, r.sum / r.count);
-            });
-            const total = weights.reduce((a, b) => a + b, 0);
-            let rand    = Math.random() * total;
-            for (let i = 0; i < questions.length; i++) {
-                rand -= weights[i];
-                if (rand <= 0) return questions[i];
-            }
-            return questions[questions.length - 1];
-        }
+        async function weightedRandom(questions) {
+    let weights = [];
+
+    for (let q of questions) {
+        const data = await getQuestionData(q);
+
+        const avg = data.avg;
+        const count = data.count;
+        const asked = data.asked;
+
+        const popularity = Math.log(1 + count);
+        const freshness  = 1 / (1 + asked);
+
+        const weight = Math.max(0.3, avg * (1 + popularity) * (1 + freshness));
+
+        weights.push(weight);
+    }
+
+    const total = weights.reduce((a, b) => a + b, 0);
+    let rand = Math.random() * total;
+
+    for (let i = 0; i < questions.length; i++) {
+        rand -= weights[i];
+        if (rand <= 0) return questions[i];
+    }
+
+    return questions[questions.length - 1];
+}
 
         function getAvailableQuestion(questions) {
             const asked     = getAskedQuestions().questions;
@@ -1043,8 +1112,9 @@ body {
         }
 
         /* ── Rendu des étoiles ── */
-        function renderStars(q) {
-            const avg   = getAvgRating(q);
+        async function renderStars(q) {
+            const data = await getQuestionData(q);
+            const avg = data.avg;
             const stars = document.querySelectorAll('.star');
             const filled = avg ? Math.round(avg) : 0;
 
@@ -1076,14 +1146,16 @@ body {
         }
 
         /* ── Affichage d'une question ── */
-        function showQuestion(q) {
-            document.getElementById('question-display').innerHTML =
-                '<p><strong>' + q + '</strong></p>';
-            renderStars(q);
-            showUI();
-            if (previousQuestion) showBack(); else hideBack();
-        }
+        async function showQuestion(q) {
+    document.getElementById('question-display').innerHTML =
+        '<p><strong>' + q + '</strong></p>';
 
+    await markQuestionAsked(q); // 🔥 AJOUT IMPORTANT
+
+    renderStars(q);
+    showUI();
+    if (previousQuestion) showBack(); else hideBack();
+}
         /* ── Skip ── */
         function skipQuestion() {
             if (!currentTheme) return;
@@ -1118,7 +1190,7 @@ body {
             hint.style.opacity = '0';
         };
 
-        wheel.addEventListener('transitionend', function () {
+        wheel.addEventListener('transitionend', async function () {
             const actualRotation  = value % 360;
             const sectionIndex    = Math.floor(actualRotation / 30) % 12;
             const themeList       = ["Souvenirs","Perception","Avenir","Amitiés","Famille","Amour","Travail","Malaises","Croyances","Conflits","Expériences","Loisirs"];
@@ -1135,7 +1207,7 @@ body {
             currentQuestions = themesQuestions[selectedTheme] || [];
             previousQuestion = null;
 
-            const q = getAvailableQuestion(currentQuestions);
+            const q = await weightedRandom(currentQuestions);
             if (!q) {
                 document.getElementById('question-display').innerHTML =
                     '<p><strong>\u23f3 Toutes les questions de ce th\u00e8me ont d\u00e9j\u00e0 \u00e9t\u00e9 pos\u00e9es aujourd\'hui. Revenez demain\u00a0!</strong></p>';
