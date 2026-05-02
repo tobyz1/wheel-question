@@ -979,6 +979,8 @@ body {
   let currentQuestion = null;
   let sessionQuestions = [];
   let sessionIndex = -1;
+  const questionStatsCache = new Map();
+  const missingDocIds = new Set();
 
   const ratingEl = document.getElementById('rating-container');
   const navEl = document.getElementById('nav-buttons');
@@ -1050,6 +1052,10 @@ body {
     return ids;
   }
 
+  function defaultQuestionStats() {
+    return { avg: 3, count: 0, asked: 0 };
+  }
+
   // Firestore REST API functions
   async function saveRating(q, note) {
     try {
@@ -1073,38 +1079,59 @@ body {
           }
         })
       });
+      missingDocIds.delete(docId);
+      questionStatsCache.set(q, {
+        avg: count > 0 ? sum / count : 3,
+        count: count,
+        asked: questionStatsCache.get(q)?.asked || 0
+      });
          } catch (e) {
       console.error("Erreur sauvegarde:", e);
     }
   }
 
-  async function getQuestionData(q) {
+  async function getQuestionData(q, useRemote = true) {
     try {
+      if (!useRemote) return questionStatsCache.get(q) || defaultQuestionStats();
+
       let response = null;
+      let usedDocId = null;
       for (const docId of getQuestionDocIds(q)) {
+        if (missingDocIds.has(docId)) continue;
         const url = `${FIRESTORE_URL}/questions/${docId}?key=${API_KEY}`;
         const r = await fetch(url);
+        if (r.status === 404) {
+          missingDocIds.add(docId);
+          continue;
+        }
         if (r.ok) {
           response = r;
+          usedDocId = docId;
           break;
         }
       }
       
-      if (!response) return { avg: 3, count: 0, asked: 0 };
+      if (!response) {
+        const fallback = questionStatsCache.get(q) || defaultQuestionStats();
+        questionStatsCache.set(q, fallback);
+        return fallback;
+      }
       
       const data = await response.json();
       const sum = parseInt(data.fields?.sum?.integerValue || 0);
       const count = parseInt(data.fields?.count?.integerValue || 0);
       const asked = parseInt(data.fields?.asked?.integerValue || 0);
-        
-      return {
+      const parsed = {
         avg: count > 0 ? sum / count : 3,
         count: count,
         asked: asked
       };
+      questionStatsCache.set(q, parsed);
+      if (usedDocId) missingDocIds.delete(usedDocId);
+      return parsed;
     } catch (e) {
       console.error("Erreur lecture:", e);
-      return { avg: 3, count: 0, asked: 0 };
+      return questionStatsCache.get(q) || defaultQuestionStats();
     }
   }
 
@@ -1126,6 +1153,13 @@ body {
           }
         })
       });
+      missingDocIds.delete(docId);
+      const current = questionStatsCache.get(q) || defaultQuestionStats();
+      questionStatsCache.set(q, {
+        avg: current.avg,
+        count: current.count,
+        asked: asked
+      });
     } catch (e) {
       console.error("Erreur marquage:", e);
     }
@@ -1135,7 +1169,7 @@ body {
     let weights = [];
 
     for (let q of questions) {
-      const data = await getQuestionData(q);
+      const data = await getQuestionData(q, false);
       const avg = data.avg;
       const count = data.count;
       const asked = data.asked;
