@@ -338,15 +338,18 @@ body {
 
     </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script>
   // Configuration Firestore REST API
   const firebaseConfig = {
     apiKey: "AIzaSyCVxw8U-DvB8YxQv09MlOcy8q5q9vlajDk",
     projectId: "roue-des-questions"
   };
-
-  const FIRESTORE_URL = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
-  const API_KEY = firebaseConfig.apiKey;
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
 
   const themesQuestions = {
@@ -1009,7 +1012,7 @@ body {
   let sessionQuestions = [];
   let sessionIndex = -1;
   const questionStatsCache = new Map();
-  const missingDocIds = new Set();
+  let signedInUserId = null;
 
   const ratingEl = document.getElementById('rating-container');
   const navEl = document.getElementById('nav-buttons');
@@ -1087,36 +1090,34 @@ body {
     return { avg: 3, count: 0, asked: 0 };
   }
 
-  // Firestore REST API functions
+  async function ensureSignedIn() {
+    if (auth.currentUser) {
+      signedInUserId = auth.currentUser.uid;
+      return auth.currentUser;
+    }
+    const credential = await auth.signInAnonymously();
+    signedInUserId = credential.user.uid;
+    return credential.user;
+  }
+
+  // Firestore SDK functions (global shared ratings)
   async function saveRating(q, note) {
     try {
+      await ensureSignedIn();
       const docId = encodeQuestionDocId(q);
-      const url = `${FIRESTORE_URL}/questions/${docId}?key=${API_KEY}`;
-      
-      const response = await fetch(url);
-      const data = response.ok ? await response.json() : null;
-      
-      const fields = data?.fields || { sum: { integerValue: "0" }, count: { integerValue: "0" } };
-      const sum = parseInt(fields.sum?.integerValue || 0) + note;
-      const count = parseInt(fields.count?.integerValue || 0) + 1;
+      const voteRef = db
+        .collection('questionStats')
+        .doc(docId)
+        .collection('votes')
+        .doc(signedInUserId);
 
-      await fetch(url, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fields: {
-            sum: { integerValue: sum.toString() },
-            count: { integerValue: count.toString() }
-          }
-        })
-      });
-      missingDocIds.delete(docId);
-      questionStatsCache.set(q, {
-        avg: count > 0 ? sum / count : 3,
-        count: count,
-        asked: questionStatsCache.get(q)?.asked || 0
-      });
-         } catch (e) {
+      await voteRef.set({
+        value: note,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      await getQuestionData(q, true);
+    } catch (e) {
       console.error("Erreur sauvegarde:", e);
     }
   }
@@ -1125,40 +1126,31 @@ body {
     try {
       if (!useRemote) return questionStatsCache.get(q) || defaultQuestionStats();
 
-      let response = null;
-      let usedDocId = null;
-      for (const docId of getQuestionDocIds(q)) {
-        if (missingDocIds.has(docId)) continue;
-        const url = `${FIRESTORE_URL}/questions/${docId}?key=${API_KEY}`;
-        const r = await fetch(url);
-        if (r.status === 404) {
-          missingDocIds.add(docId);
-          continue;
+      await ensureSignedIn();
+      const docId = encodeQuestionDocId(q);
+      const votesSnap = await db
+        .collection('questionStats')
+        .doc(docId)
+        .collection('votes')
+        .get();
+
+      let sum = 0;
+      let count = 0;
+      votesSnap.forEach((doc) => {
+        const value = Number(doc.data()?.value || 0);
+        if (value >= 1 && value <= 5) {
+          sum += value;
+          count += 1;
         }
-        if (r.ok) {
-          response = r;
-          usedDocId = docId;
-          break;
-        }
-      }
-      
-      if (!response) {
-        const fallback = questionStatsCache.get(q) || defaultQuestionStats();
-        questionStatsCache.set(q, fallback);
-        return fallback;
-      }
-      
-      const data = await response.json();
-      const sum = parseInt(data.fields?.sum?.integerValue || 0);
-      const count = parseInt(data.fields?.count?.integerValue || 0);
-      const asked = parseInt(data.fields?.asked?.integerValue || 0);
+      });
+
+      const asked = questionStatsCache.get(q)?.asked || 0;
       const parsed = {
         avg: count > 0 ? sum / count : 3,
         count: count,
         asked: asked
       };
       questionStatsCache.set(q, parsed);
-      if (usedDocId) missingDocIds.delete(usedDocId);
       return parsed;
     } catch (e) {
       console.error("Erreur lecture:", e);
@@ -1167,33 +1159,12 @@ body {
   }
 
   async function markQuestionAsked(q) {
-    try {
-      const docId = encodeQuestionDocId(q);
-      const url = `${FIRESTORE_URL}/questions/${docId}?key=${API_KEY}`;
-      
-      const response = await fetch(url);
-      const data = response.ok ? await response.json() : null;
-      const asked = parseInt(data?.fields?.asked?.integerValue || 0) + 1;
-
-      await fetch(url, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fields: {
-            asked: { integerValue: asked.toString() }
-          }
-        })
-      });
-      missingDocIds.delete(docId);
-      const current = questionStatsCache.get(q) || defaultQuestionStats();
-      questionStatsCache.set(q, {
-        avg: current.avg,
-        count: current.count,
-        asked: asked
-      });
-    } catch (e) {
-      console.error("Erreur marquage:", e);
-    }
+    const current = questionStatsCache.get(q) || defaultQuestionStats();
+    questionStatsCache.set(q, {
+      avg: current.avg,
+      count: current.count,
+      asked: current.asked + 1
+    });
   }
 
   async function weightedRandom(questions) {
