@@ -308,24 +308,16 @@ body {
 
     </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-analytics.js";
-  import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
-
+<script>
+  // Configuration Firestore REST API
   const firebaseConfig = {
     apiKey: "AIzaSyCVxw8U-DvB8YxQv09MlOcy8q5q9vlajDk",
-    authDomain: "roue-des-questions.firebaseapp.com",
-    projectId: "roue-des-questions",
-    storageBucket: "roue-des-questions.firebasestorage.app",
-    messagingSenderId: "297075017743",
-    appId: "1:297075017743:web:0bf54c8d1252c027a8fb7a",
-    measurementId: "G-ZXY1B21J3S"
+    projectId: "roue-des-questions"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const db = getFirestore(app);
+  const FIRESTORE_URL = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
+  const API_KEY = firebaseConfig.apiKey;
+
 
   const themesQuestions = {
             "Souvenirs": ["Quel est ton premier souvenirs ?","Est ce que tu étais boloss ou est ce que tu bolossais au collèges ?","En quatre minutes, racontez votre vie de la façon la plus détaillée possible","Ta  plus grande douleur physique ? ","Quel est votre souvenir le plus précieux ?","Quel est votre plus terrible souvenir ?","Quel est le truc que tu faisais ado dont tu as honte aujourd'hui ?","Raconte ta pire galère de soirée, celle dont tu te souviendras toujours","As-tu déjà vécu une expérience paranormale ? Ou juste un moment étrange que tu n'arrives pas à expliquer ?","As-tu déjà été viré·e de cours ou pris une heure de colle au collège/lycée ? Si oui, pourquoi ?","Avez-vous déjà écrit une chanson pour quelqu'un ?","Croyez-vous en l'utilité d'un porte-bonheur ou d'un objet pour les examens","Pensez-vous que des extraterrestres puissent un jour visiter la Terre ?","Avez-vous ou avez-eu un ami imaginaire ?","Avez-vous déjà souhaité pouvoir parler aux animaux et comprendre ce qu'ils disent ?","Avez-vous un super-héros préféré ?","Aimez-vous participer aux discussions et aux débats en classe ?","Aimez-vous écrire vos propres histoires ou poèmes ?","Avez-vous déjà écrit une lettre à votre futur moi ?","Quelle est la dernière chose qui t'a fait pleurer?","Quelle était ta matière scolaire favorite?","À quand remonte la dernière fois où vous vous êtes senti(e) chanceux(se) d'être vous","Qu'est-ce que votre jeune moi ne croirait pas à propos de votre vie d'aujourd'hui ?","Quel est votre meilleur souvenir d'enfance ?","Quelle est l'action que vous regrettez le plus ?","Quel est votre plus grand regret ?"],
@@ -392,39 +384,49 @@ body {
     localStorage.setItem('askedQuestions', JSON.stringify(data));
   }
 
+  // Firestore REST API functions
   async function saveRating(q, note) {
     try {
-      const ref = doc(db, "questions", btoa(q));
-      const snap = await getDoc(ref);
+      const docId = btoa(q);
+      const url = `${FIRESTORE_URL}/questions/${docId}?key=${API_KEY}`;
+      
+      const response = await fetch(url);
+      const data = response.ok ? await response.json() : null;
+      
+      const fields = data?.fields || { 
+        sum: { integerValue: "0" }, 
+        count: { integerValue: "0" } 
+      };
+      const sum = parseInt(fields.sum?.integerValue || 0) + note;
+      const count = parseInt(fields.count?.integerValue || 0) + 1;
 
-      if (!snap.exists()) {
-        await setDoc(ref, { sum: note, count: 1, asked: 0 });
-      } else {
-        const data = snap.data();
-        await updateDoc(ref, {
-          sum: data.sum + note,
-          count: data.count + 1
-        });
-      }
-    } catch (e) {
-      console.error("Erreur sauvegarde:", e);
-    }
-  }
+      await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            sum: { integerValue: sum.toString() },
+            count: { integerValue: count.toString() }
+          }
+        })
+      });
 
   async function getQuestionData(q) {
     try {
-      const ref = doc(db, "questions", btoa(q));
-      const snap = await getDoc(ref);
-
-      if (!snap.exists()) {
-        return { avg: 3, count: 0, asked: 0 };
-      }
-
-      const data = snap.data();
+      const docId = btoa(q);
+      const url = `${FIRESTORE_URL}/questions/${docId}?key=${API_KEY}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) return { avg: 3, count: 0, asked: 0 };
+      
+      const data = await response.json();
+      const sum = parseInt(data.fields?.sum?.integerValue || 0);
+      const count = parseInt(data.fields?.count?.integerValue || 0);
+      const asked = parseInt(data.fields?.asked?.integerValue || 0);
       return {
-        avg: data.count > 0 ? data.sum / data.count : 3,
-        count: data.count || 0,
-        asked: data.asked || 0
+        avg: count > 0 ? sum / count : 3,
+        count: count,
+        asked: asked
       };
     } catch (e) {
       console.error("Erreur lecture:", e);
@@ -434,17 +436,22 @@ body {
 
   async function markQuestionAsked(q) {
     try {
-      const ref = doc(db, "questions", btoa(q));
-      const snap = await getDoc(ref);
+      const docId = btoa(q);
+      const url = `${FIRESTORE_URL}/questions/${docId}?key=${API_KEY}`;
+      
+      const response = await fetch(url);
+      const data = response.ok ? await response.json() : null;
+      const asked = parseInt(data?.fields?.asked?.integerValue || 0) + 1;
 
-      if (!snap.exists()) {
-        await setDoc(ref, { sum: 0, count: 0, asked: 1 });
-      } else {
-        const data = snap.data();
-        await updateDoc(ref, {
-          asked: (data.asked || 0) + 1
-        });
-      }
+      await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            asked: { integerValue: asked.toString() }
+          }
+        })
+      });
     } catch (e) {
       console.error("Erreur marquage:", e);
     }
