@@ -62,12 +62,14 @@
         const noteQuestionsByTheme = {};
 
         async function ensureSignedIn() {
-            if (auth.currentUser) {
-                return auth.currentUser;
-            }
-            const credential = await auth.signInAnonymously();
-            return credential.user;
-        }
+  if (auth.currentUser) {
+    console.log("UID courant:", auth.currentUser.uid);
+    return auth.currentUser;
+  }
+  const credential = await auth.signInAnonymously();
+  console.log("UID courant:", credential.user.uid);
+  return credential.user;
+}
 
         async function loadQuestionsForNote(noteId) {
             await ensureSignedIn();
