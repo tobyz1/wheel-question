@@ -1,266 +1,159 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap');
 
 @keyframes blink {
-    0%   { background-color: rgb(204, 60, 60); }
-    50%  { background-color: #fff; }
-    100% { background-color: rgb(204, 60, 60); }
+  0% { background-color: rgb(204, 60, 60); }
+  50% { background-color: #fff; }
+  100% { background-color: rgb(204, 60, 60); }
 }
+
 @keyframes shadowBlink {
-    0%   { box-shadow: 0 0 0 5px #333, 0 0 0 15px rgb(204, 60, 60), 0 0 0 18px #111; }
-    50%  { box-shadow: 0 0 0 5px #333, 0 0 0 15px #fff,              0 0 0 18px #111; }
-    100% { box-shadow: 0 0 0 5px #333, 0 0 0 15px rgb(204, 60, 60), 0 0 0 18px #111; }
-}
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+  0% {
+    box-shadow: 0 0 0 5px #333, 0 0 0 15px rgb(204, 60, 60), 0 0 0 18px #111;
+  }
+  50% {
+    box-shadow: 0 0 0 5px #333, 0 0 0 15px #fff, 0 0 0 18px #111;
+  }
+  100% {
+    box-shadow: 0 0 0 5px #333, 0 0 0 15px rgb(204, 60, 60), 0 0 0 18px #111;
+  }
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
 }
 
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 10vh;
-    min-width: 100vw;
-    background: #2a2a2a;
-    padding: 40px 20px;
-    transition: background 0.6s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #333;
+  transition: background 0.35s ease;
 }
 
-/* ── Layout : toujours en colonne, centré ── */
-.page-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 40px;
-    width: 100%;
-    max-width: 620px;
-}
-
-/* ── Roue ── */
 .container {
-    position: relative;
-    --wheel-size: clamp(240px, 55vw, 420px);
-    width:  var(--wheel-size);
-    height: var(--wheel-size);
-    flex-shrink: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  position: relative;
+  width: 400px;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .container .spinBtn {
-    position: absolute;
-    width: 56px;
-    height: 56px;
-    background: rgba(10, 10, 10, 0.85);
-    border-radius: 50%;
-    z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-transform: uppercase;
-    font-weight: 700;
-    font-size: 0.62em;
-    color: #e0e0e0;
-    letter-spacing: 0.08em;
-    border: 3px solid rgba(255,255,255,0.12);
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.15s ease;
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 50%;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgb(212, 212, 212);
+  letter-spacing: 0.1em;
+  border: 4px solid rgba(0, 0, 0, 0.75);
+  cursor: pointer;
+  user-select: none;
 }
-.container .spinBtn:hover { transform: scale(1.09); }
 
 .container .spinBtn::before {
-    content: '';
-    position: absolute;
-    top: -26px;
-    width: 18px;
-    height: 32px;
-    background: #fff;
-    clip-path: polygon(50% 0, 0 100%, 100% 100%);
+  content: '';
+  position: absolute;
+  top: -28px;
+  width: 20px;
+  height: 35px;
+  background: #fff;
+  clip-path: polygon(50% 0, 0 100%, 100% 100%);
 }
 
-.blinking::before { animation: blink 0.5s infinite; }
-.blinking         { animation: blink 0.5s infinite; }
+.blinking::before,
+.blinking {
+  animation: blink 0.5s infinite;
+}
 
 .container .wheel {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: #333;
-    border-radius: 50%;
-    overflow: hidden;
-    box-shadow: 0 0 0 5px #333,
-                0 0 0 15px #fff,
-                0 0 0 18px #111,
-                0 8px 40px rgba(0,0,0,0.4);
-    transition: transform 5s ease-in-out;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #333;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 5px #333, 0 0 0 15px #fff, 0 0 0 18px #111;
+  transition: transform 5s ease-in-out;
+  transform: rotate(0deg);
 }
 
-.blinkaaa { animation: shadowBlink 0.5s infinite; }
+.blinkaaa {
+  animation: shadowBlink 0.5s infinite;
+}
 
 .container .wheel .number {
-    position: absolute;
-    width: 50%; height: 50%;
-    background: var(--clr);
-    transform-origin: bottom right;
-    transform: rotate(calc(30deg * var(--i)));
-    clip-path: polygon(0 0, 45% 0, 100% 100%, 0 39%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    user-select: none;
-    cursor: pointer;
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  background: var(--clr);
+  transform-origin: bottom right;
+  transform: rotate(calc(30deg * var(--i)));
+  clip-path: polygon(0 0, 45% 0, 100% 100%, 0 39%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
 }
 
 .container .wheel .number span {
-    position: relative;
-    transform: rotate(45deg);
-    font-size: clamp(0.85em, 2.5vw, 1.4em);
-    font-weight: 700;
-    color: rgba(20, 18, 18, 0.85);
-    text-shadow: 1px 1px 2px rgba(255,255,255,0.35);
-    white-space: nowrap;
+  position: relative;
+  transform: rotate(45deg);
+  font-size: 1.05em;
+  font-weight: 700;
+  color: rgba(17, 15, 15, 0.86);
+  text-shadow: 3px 2px 2px rgba(173, 173, 173, 0.75);
 }
 
-/* ── Zone question : toujours sous la roue, centrée ── */
 .question-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 12px;
+  margin-left: 30px;
+  padding: 0 6px;
+  max-width: 420px;
+  color: #111;
 }
 
-.theme-label {
-    font-size: 1rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: rgba(255,255,255,0.35);
+.question-container h2 {
+  margin-bottom: 8px;
 }
 
-#selected-theme {
-    display: block;
-    font-size: clamp(2.8rem, 7vw, 4.2rem);
-    font-weight: 800;
-    color: #fff;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-}
-
-.divider {
-    width: 44px;
-    height: 4px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 2px;
+.note-id {
+  margin-bottom: 12px;
+  font-size: 0.95rem;
 }
 
 #question-display {
-    font-size: clamp(1.5rem, 3.5vw, 2rem);
-    line-height: 1.75;
-    color: rgba(255,255,255,0.82);
-    max-width: 520px;
+  text-align: right;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  min-height: 70px;
 }
 
-#question-display p { animation: fadeInUp 0.4s ease; }
-#question-display strong { font-weight: 600; color: #fff; }
-
-.hint {
-    font-size: 1rem;
-    color: rgba(255,255,255,0.22);
-    font-style: italic;
-}
-
-/* ── Notation par étoiles ── */
-#rating-container {
-    display: none;
+@media (max-width: 900px) {
+  body {
     flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    animation: fadeInUp 0.4s ease;
-}
+    padding: 20px;
+  }
 
-.rating-label {
-    font-size: 0.82rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.35);
-}
+  .question-container {
+    margin-left: 0;
+    margin-top: 20px;
+    max-width: 100%;
+  }
 
-#stars {
-    display: flex;
-    gap: 6px;
-    cursor: pointer;
-}
-
-.star {
-    font-size: clamp(1.6rem, 5vw, 2rem);
-    color: rgba(255,255,255,0.25);
-    transition: color 0.15s ease, transform 0.15s ease;
-    line-height: 1;
-    user-select: none;
-}
-
-.star:hover,
-.star.active {
-    color: #ffd966;
-    transform: scale(1.18);
-}
-
-#avg-rating {
-    font-size: 0.78rem;
-    color: rgba(255,255,255,0.38);
-    font-style: italic;
-    min-height: 1.2em;
-}
-
-/* ── Boutons navigation (Précédente / Passer) ── */
-#nav-buttons {
-    display: none;
-    flex-direction: row;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
-    animation: fadeInUp 0.4s ease;
-}
-
-#nav-buttons button {
-    padding: 9px 22px;
-    border-radius: 24px;
-    border: 2px solid rgba(255,255,255,0.18);
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.75);
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.88rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
-    backdrop-filter: blur(4px);
-}
-
-#nav-buttons button:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: rgba(255,255,255,0.4);
-    color: #fff;
-    transform: translateY(-2px);
-}
-
-#nav-buttons button:active {
-    transform: translateY(0);
-}
-
-#btn-back[style*="hidden"] {
-    opacity: 0;
-    pointer-events: none;
+  #question-display {
+    text-align: center;
+  }
 }
