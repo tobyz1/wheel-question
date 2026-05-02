@@ -979,7 +979,6 @@ body {
   let currentQuestion = null;
   let sessionQuestions = [];
   let sessionIndex = -1;
-  const themeSessions = {};
   const questionStatsCache = new Map();
   const missingDocIds = new Set();
 
@@ -1319,27 +1318,8 @@ body {
     spinBtn.classList.remove('blinking');
     wheel.classList.remove('blinkaaa');
 
-    if (currentTheme) {
-      themeSessions[currentTheme] = {
-        questions: [...sessionQuestions],
-        index: sessionIndex
-      };
-    }
-
     currentTheme = selectedTheme;
     currentQuestions = themesQuestions[selectedTheme] || [];
-
-    const savedSession = themeSessions[selectedTheme];
-    if (savedSession && savedSession.questions.length > 0) {
-      sessionQuestions = [...savedSession.questions];
-      sessionIndex = Math.max(0, Math.min(savedSession.index, sessionQuestions.length - 1));
-      currentQuestion = sessionQuestions[sessionIndex];
-      showQuestion(currentQuestion, false);
-      return;
-    }
-
-    sessionQuestions = [];
-    sessionIndex = -1;
 
     const q = await getNextQuestionForSession();
     if (!q) {
@@ -1348,11 +1328,13 @@ body {
       return;
     }
 
+    if (sessionIndex < sessionQuestions.length - 1) {
+      sessionQuestions = sessionQuestions.slice(0, sessionIndex + 1);
+    }
     sessionQuestions.push(q);
-    sessionIndex = 0;
+    sessionIndex = sessionQuestions.length - 1;
     currentQuestion = q;
     saveAskedQuestion(q);
-    themeSessions[currentTheme] = { questions: [...sessionQuestions], index: sessionIndex };
     showQuestion(q, true);
   });
 
