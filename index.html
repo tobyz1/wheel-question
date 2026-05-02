@@ -251,6 +251,28 @@ body {
     opacity: 0;
     pointer-events: none;
 }
+
+#carousel-indicator {
+    display: none;
+    min-width: 90px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.62);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 6px 22px rgba(0,0,0,0.16);
+    animation: fadeInUp 0.35s ease;
+}
+
+#carousel-indicator.visible {
+    display: inline-block;
+}
     </style>
 </head>
 <body>
@@ -991,11 +1013,13 @@ body {
   function showUI() { 
     ratingEl.classList.add('visible'); 
     navEl.classList.add('visible'); 
+    carouselIndicator.classList.add('visible');
   }
 
   function hideUI() { 
     ratingEl.classList.remove('visible'); 
     navEl.classList.remove('visible'); 
+    carouselIndicator.classList.remove('visible');
   }
 
   function showBack() { 
