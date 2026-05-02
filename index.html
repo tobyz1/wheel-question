@@ -438,8 +438,10 @@ body {
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
-
-
+firebase.auth().signInAnonymously()
+  .catch(error => {
+    console.error("Erreur connexion anonyme:", error);
+  });
   const themesQuestions = {
     "Souvenirs": [
                 "Quel est ton premier souvenirs ?",
