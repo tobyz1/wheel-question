@@ -297,11 +297,12 @@ body {
                 <div id="avg-rating"></div>
             </div>
 
-            <!-- Boutons Skip / Retour -->
+            <!-- Boutons Suivante / Retour -->
             <div id="nav-buttons">
                 <button id="btn-back" onclick="goBack()">&#8592; Précédente</button>
-                <button id="btn-skip" onclick="skipQuestion()">Passer &#8594;</button>
+                <button id="btn-skip" onclick="skipQuestion()">Suivante &#8594;</button>
             </div>
+            <div id="carousel-indicator">0 / 0</div>
 
             <p class="hint">Appuyez sur SPIN pour commencer</p>
         </div>
@@ -976,11 +977,14 @@ body {
   let currentTheme = null;
   let currentQuestions = [];
   let currentQuestion = null;
-  let previousQuestion = null;
+  let sessionQuestions = [];
+  let sessionIndex = -1;
 
   const ratingEl = document.getElementById('rating-container');
   const navEl = document.getElementById('nav-buttons');
   const btnBack = document.getElementById('btn-back');
+  const btnSkip = document.getElementById('btn-skip');
+  const carouselIndicator = document.getElementById('carousel-indicator');
 
   function showUI() { 
     ratingEl.classList.add('visible'); 
@@ -998,6 +1002,14 @@ body {
 
   function hideBack() { 
     btnBack.classList.add('hidden'); 
+  }
+
+  function updateCarouselIndicator() {
+    if (sessionQuestions.length === 0 || sessionIndex < 0) {
+      carouselIndicator.textContent = '0 / 0';
+      return;
+    }
+    carouselIndicator.textContent = (sessionIndex + 1) + ' / ' + sessionQuestions.length;
   }
 
   function getTodayKey() {
@@ -1018,10 +1030,30 @@ body {
     localStorage.setItem('askedQuestions', JSON.stringify(data));
   }
 
+  function encodeQuestionDocId(q) {
+    const bytes = new TextEncoder().encode(q);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }
+
+  function getQuestionDocIds(q) {
+    const ids = [encodeQuestionDocId(q)];
+    try {
+      const legacyId = btoa(q);
+      if (!ids.includes(legacyId)) ids.push(legacyId);
+    } catch (_) {
+      // Legacy btoa fails on non-Latin1 chars; ignore.
+    }
+    return ids;
+  }
+
   // Firestore REST API functions
   async function saveRating(q, note) {
     try {
-      const docId = btoa(q);
+      const docId = encodeQuestionDocId(q);
       const url = `${FIRESTORE_URL}/questions/${docId}?key=${API_KEY}`;
       
       const response = await fetch(url);
@@ -1048,11 +1080,17 @@ body {
 
   async function getQuestionData(q) {
     try {
-      const docId = btoa(q);
-      const url = `${FIRESTORE_URL}/questions/${docId}?key=${API_KEY}`;
-      const response = await fetch(url);
+      let response = null;
+      for (const docId of getQuestionDocIds(q)) {
+        const url = `${FIRESTORE_URL}/questions/${docId}?key=${API_KEY}`;
+        const r = await fetch(url);
+        if (r.ok) {
+          response = r;
+          break;
+        }
+      }
       
-      if (!response.ok) return { avg: 3, count: 0, asked: 0 };
+      if (!response) return { avg: 3, count: 0, asked: 0 };
       
       const data = await response.json();
       const sum = parseInt(data.fields?.sum?.integerValue || 0);
@@ -1072,7 +1110,7 @@ body {
 
   async function markQuestionAsked(q) {
     try {
-      const docId = btoa(q);
+      const docId = encodeQuestionDocId(q);
       const url = `${FIRESTORE_URL}/questions/${docId}?key=${API_KEY}`;
       
       const response = await fetch(url);
@@ -1160,9 +1198,9 @@ body {
     }
   }
 
-  async function showQuestion(q) {
+  async function showQuestion(q, countAsAsked = true) {
     document.getElementById('question-display').innerHTML = '<p><strong>' + q + '</strong></p>';
-    await markQuestionAsked(q);
+    if (countAsAsked) await markQuestionAsked(q);
 
     try {
       await renderStars(q);
@@ -1171,31 +1209,58 @@ body {
     }
 
     showUI();
-    if (previousQuestion) showBack();
+    if (sessionIndex > 0) showBack();
     else hideBack();
+
+    if (sessionIndex < sessionQuestions.length - 1) {
+      btnSkip.textContent = 'Suivante →';
+    } else {
+      btnSkip.textContent = 'Nouvelle question →';
+    }
+    updateCarouselIndicator();
   }
 
-  function skipQuestion() {
+  async function getNextQuestionForSession() {
+    const asked = getAskedQuestions().questions;
+    const available = currentQuestions.filter(q => !asked.includes(q));
+
+    if (available.length > 0) {
+      return await weightedRandom(available);
+    }
+
+    if (currentQuestions.length === 0) return null;
+    return await weightedRandom(currentQuestions);
+  }
+
+  async function skipQuestion() {
     if (!currentTheme) return;
-    if (currentQuestion) saveAskedQuestion(currentQuestion);
-    getAvailableQuestion(currentQuestions).then(next => {
-      if (!next) {
-        document.getElementById('question-display').innerHTML = '<p><strong>⏳ Toutes les questions de ce thème ont été posées aujourd\'hui. Revenez demain !</strong></p>';
-        hideUI();
-        return;
-      }
-      previousQuestion = currentQuestion;
-      currentQuestion = next;
-      saveAskedQuestion(next);
-      showQuestion(next);
-    });
+
+    if (sessionIndex < sessionQuestions.length - 1) {
+      sessionIndex += 1;
+      currentQuestion = sessionQuestions[sessionIndex];
+      await showQuestion(currentQuestion, false);
+      return;
+    }
+
+    const next = await getNextQuestionForSession();
+    if (!next) {
+      document.getElementById('question-display').innerHTML = '<p><strong>⏳ Aucune question disponible pour ce thème.</strong></p>';
+      hideUI();
+      return;
+    }
+
+    sessionQuestions.push(next);
+    sessionIndex = sessionQuestions.length - 1;
+    currentQuestion = next;
+    saveAskedQuestion(next);
+    await showQuestion(next, true);
   }
 
   function goBack() {
-    if (!previousQuestion) return;
-    currentQuestion = previousQuestion;
-    previousQuestion = null;
-    showQuestion(currentQuestion);
+    if (sessionIndex <= 0) return;
+    sessionIndex -= 1;
+    currentQuestion = sessionQuestions[sessionIndex];
+    showQuestion(currentQuestion, false);
   }
 
   spinBtn.onclick = function () {
@@ -1221,17 +1286,21 @@ body {
 
     currentTheme = selectedTheme;
     currentQuestions = themesQuestions[selectedTheme] || [];
-    previousQuestion = null;
+    sessionQuestions = [];
+    sessionIndex = -1;
 
-    const q = await weightedRandom(currentQuestions);
+    const q = await getNextQuestionForSession();
     if (!q) {
       document.getElementById('question-display').innerHTML = '<p><strong>⏳ Toutes les questions de ce thème ont déjà été posées aujourd\'hui. Revenez demain !</strong></p>';
       hideUI();
       return;
     }
+
+    sessionQuestions.push(q);
+    sessionIndex = 0;
     currentQuestion = q;
     saveAskedQuestion(q);
-    showQuestion(q);
+    showQuestion(q, true);
   });
 
   function shadeColor(hex, percent) {
@@ -1246,6 +1315,7 @@ body {
   }
 
   hideBack();
+  updateCarouselIndicator();
 </script>
 </body>
 </html>
