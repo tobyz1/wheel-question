@@ -719,30 +719,28 @@
   <div id="toast"></div>
 
   <!-- Firebase -->
-  <script type="module">
+   <script type="module">
     import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged }
+    import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged }
                                       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc,
-             onSnapshot, query, where, orderBy, serverTimestamp, getDocs }
+    import { getFirestore, collection, doc, getDoc, addDoc, updateDoc,
+             onSnapshot, query, where, orderBy, serverTimestamp }
                                       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    // ─── CONFIG ─── remplace par ta config Firebase ───────────────────
+ 
     const firebaseConfig = {
-  apiKey: "AIzaSyCVxw8U-DvB8YxQv09MlOcy8q5q9vlajDk",
-  authDomain: "roue-des-questions.firebaseapp.com",
-  projectId: "roue-des-questions",
-  storageBucket: "roue-des-questions.firebasestorage.app",
-  messagingSenderId: "297075017743",
-  appId: "1:297075017743:web:0bf54c8d1252c027a8fb7a",
-  measurementId: "G-ZXY1B21J3S"
-};
-    // ──────────────────────────────────────────────────────────────────
-
+      apiKey:            "AIzaSyCVxw8U-DvB8YxQv09MlOcy8q5q9vlajDk",
+      authDomain:        "roue-des-questions.firebaseapp.com",
+      projectId:         "roue-des-questions",
+      storageBucket:     "roue-des-questions.firebasestorage.app",
+      messagingSenderId: "297075017743",
+      appId:             "1:297075017743:web:0bf54c8d1252c027a8fb7a",
+      measurementId:     "G-ZXY1B21J3S"
+    };
+ 
     const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db   = getFirestore(app);
-
+ 
     // ── DOM refs ──
     const authScreen    = document.getElementById('auth-screen');
     const adminPanel    = document.getElementById('admin-panel');
@@ -762,19 +760,18 @@
     const modalCancel   = document.getElementById('modal-cancel');
     const modalConfirm  = document.getElementById('modal-confirm');
     const toast         = document.getElementById('toast');
-
-    let currentFilter  = 'pending';
-    let unsubscribe    = null;
-    let pendingRejectId= null;
-    let allCounts      = { pending: 0, approved: 0, rejected: 0 };
-
+ 
+    let currentFilter   = 'pending';
+    let unsubscribe     = null;
+    let pendingRejectId = null;
+ 
     const LABELS = {
       pending:  'Propositions en attente',
       approved: 'Questions approuvées',
       rejected: 'Questions refusées',
       all:      'Toutes les propositions'
     };
-
+ 
     // ── TOAST ──
     let toastTimer;
     function showToast(msg, type = '') {
@@ -783,79 +780,74 @@
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => { toast.className = ''; }, 3000);
     }
-
-// ── AUTH ──
-signinBtn.addEventListener('click', async () => {
-  const provider = new GoogleAuthProvider();
-  await signInWithRedirect(auth, provider);
-});
-logoutBtn.addEventListener('click', () => signOut(auth));
-
-// Lance d'abord le redirect result, PUIS écoute l'état
-getRedirectResult(auth)
-  .then(async (result) => {
-    if (result?.user) {
-      console.log("Retour redirect, UID :", result.user.uid);
-    }
-  })
-  .catch(e => console.error("Redirect error:", e));
-
-getRedirectResult(auth)
-  .then(async (result) => {
-    if (result?.user) {
-      console.log("Retour redirect, UID :", result.user.uid);
-    }
-  })
-  .catch(e => console.error("Redirect error:", e))
-  .finally(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        authScreen.style.display = 'flex';
-        adminPanel.style.display = 'none';
-        adminInfo.style.display  = 'none';
-        logoutBtn.style.display  = 'none';
-        return;
-      }
-
-      console.log("Connecté :", user.uid);
-
-      try {
-        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-
-        if (!adminDoc.exists()) {
-          noAccessMsg.style.display = 'block';
-          await signOut(auth);
-          return;
-        }
-
-        authScreen.style.display = 'none';
-        adminPanel.style.display = 'block';
-        adminInfo.style.display  = 'flex';
-        logoutBtn.style.display  = 'block';
-        adminEmail.textContent   = user.email;
-
-        loadStats();
-        loadSubmissions(currentFilter);
-
-      } catch (e) {
-        console.error("Erreur auth/admin :", e);
-        showToast("Erreur chargement admin", "error");
-      }
+ 
+    // ── AUTH ──
+    signinBtn.addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
+      await signInWithRedirect(auth, provider);
     });
-  });
-
-    // ── STATS (toutes les submissions en une requête) ──
+ 
+    logoutBtn.addEventListener('click', () => signOut(auth));
+ 
+    // Traite le retour de redirection Google, puis démarre l'écoute auth
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          console.log("Retour redirect, UID :", result.user.uid);
+        }
+      })
+      .catch(e => console.error("Redirect error:", e))
+      .finally(() => {
+        onAuthStateChanged(auth, async (user) => {
+          if (!user) {
+            authScreen.style.display = 'flex';
+            adminPanel.style.display = 'none';
+            adminInfo.style.display  = 'none';
+            logoutBtn.style.display  = 'none';
+            return;
+          }
+ 
+          console.log("Connecté :", user.uid);
+ 
+          try {
+            const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+ 
+            if (!adminDoc.exists()) {
+              noAccessMsg.style.display = 'block';
+              await signOut(auth);
+              return;
+            }
+ 
+            authScreen.style.display = 'none';
+            adminPanel.style.display = 'block';
+            adminInfo.style.display  = 'flex';
+            logoutBtn.style.display  = 'block';
+            adminEmail.textContent   = user.email;
+ 
+            loadStats();
+            loadSubmissions(currentFilter);
+ 
+          } catch (e) {
+            console.error("Erreur auth/admin :", e);
+            showToast("Erreur chargement admin", "error");
+          }
+        });
+      });
+ 
+    // ── STATS ──
     function loadStats() {
       onSnapshot(collection(db, 'questionSubmissions'), (snap) => {
         const c = { pending: 0, approved: 0, rejected: 0 };
-        snap.forEach(d => { const s = d.data().status; if (c[s] !== undefined) c[s]++; });
-        allCounts = c;
+        snap.forEach(d => {
+          const s = d.data().status;
+          if (c[s] !== undefined) c[s]++;
+        });
         countPending.textContent  = c.pending;
         countApproved.textContent = c.approved;
         countRejected.textContent = c.rejected;
       });
     }
-
+ 
     // ── FILTER TABS ──
     tabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -866,17 +858,17 @@ getRedirectResult(auth)
         loadSubmissions(currentFilter);
       });
     });
-
+ 
     // ── LOAD SUBMISSIONS ──
     function loadSubmissions(filter) {
       if (unsubscribe) unsubscribe();
       submList.innerHTML = `<div class="state-msg"><div class="spinner"></div>Chargement…</div>`;
-
+ 
       const ref = collection(db, 'questionSubmissions');
       const q   = filter === 'all'
         ? query(ref, orderBy('createdAt', 'desc'))
         : query(ref, where('status', '==', filter), orderBy('createdAt', 'desc'));
-
+ 
       unsubscribe = onSnapshot(q, (snap) => {
         if (snap.empty) {
           submList.innerHTML = `<div class="state-msg"><span class="icon">📭</span>Aucune proposition ici.</div>`;
@@ -890,21 +882,24 @@ getRedirectResult(auth)
         submList.innerHTML = `<div class="state-msg">Erreur : ${err.message}</div>`;
       });
     }
-
+ 
     // ── BUILD CARD ──
     function buildCard(id, data) {
       const card = document.createElement('div');
-      card.className = 'submission-card';
+      card.className  = 'submission-card';
       card.dataset.id = id;
-
+ 
       const date = data.createdAt?.toDate
-        ? data.createdAt.toDate().toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
+        ? data.createdAt.toDate().toLocaleDateString('fr-FR', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          })
         : '—';
-
+ 
       const isPending  = data.status === 'pending';
       const isApproved = data.status === 'approved';
       const isRejected = data.status === 'rejected';
-
+ 
       card.innerHTML = `
         <div class="card-top">
           <div class="card-meta">
@@ -915,7 +910,9 @@ getRedirectResult(auth)
           <div class="card-question">${escHtml(data.text || '')}</div>
           <div class="card-uid">proposé par <span>${escHtml(data.createdBy || '—')}</span></div>
         </div>
-        ${isRejected && data.rejectionReason ? `<div class="rejection-reason">${escHtml(data.rejectionReason)}</div>` : ''}
+        ${isRejected && data.rejectionReason
+          ? `<div class="rejection-reason">${escHtml(data.rejectionReason)}</div>`
+          : ''}
         <div class="card-actions">
           ${isPending ? `
             <button class="btn btn-approve" data-action="approve">
@@ -931,25 +928,23 @@ getRedirectResult(auth)
           `}
         </div>
       `;
-
-      // Events
+ 
       card.querySelectorAll('[data-action]').forEach(btn => {
         btn.addEventListener('click', () => {
           if (btn.dataset.action === 'approve') approveSubmission(id, data);
           if (btn.dataset.action === 'reject')  openRejectModal(id);
         });
       });
-
+ 
       return card;
     }
-
+ 
     // ── APPROVE ──
     async function approveSubmission(id, data) {
       const card = document.querySelector(`[data-id="${id}"]`);
       card.querySelectorAll('.btn').forEach(b => b.disabled = true);
-
+ 
       try {
-        // 1. Copie dans la vraie collection
         const targetRef = collection(db, 'questions', data.theme, 'items');
         await addDoc(targetRef, {
           text:       data.text,
@@ -958,45 +953,44 @@ getRedirectResult(auth)
           approvedBy: auth.currentUser.uid,
           sourceId:   id
         });
-
-        // 2. Mise à jour du statut
+ 
         await updateDoc(doc(db, 'questionSubmissions', id), {
           status:     'approved',
           approvedAt: serverTimestamp(),
           approvedBy: auth.currentUser.uid
         });
-
+ 
         showToast('✓ Question approuvée et copiée dans la base', 'success');
       } catch (e) {
         showToast('Erreur : ' + e.message, 'error');
         card.querySelectorAll('.btn').forEach(b => b.disabled = false);
       }
     }
-
+ 
     // ── REJECT MODAL ──
     function openRejectModal(id) {
-      pendingRejectId = id;
+      pendingRejectId    = id;
       rejectReason.value = '';
       rejectBackdrop.classList.add('open');
       rejectReason.focus();
     }
-
+ 
     modalCancel.addEventListener('click', () => {
       rejectBackdrop.classList.remove('open');
       pendingRejectId = null;
     });
-
+ 
     rejectBackdrop.addEventListener('click', (e) => {
       if (e.target === rejectBackdrop) {
         rejectBackdrop.classList.remove('open');
         pendingRejectId = null;
       }
     });
-
+ 
     modalConfirm.addEventListener('click', async () => {
       if (!pendingRejectId) return;
       modalConfirm.disabled = true;
-
+ 
       try {
         await updateDoc(doc(db, 'questionSubmissions', pendingRejectId), {
           status:          'rejected',
@@ -1010,17 +1004,21 @@ getRedirectResult(auth)
         showToast('Erreur : ' + e.message, 'error');
       } finally {
         modalConfirm.disabled = false;
-        pendingRejectId = null;
+        pendingRejectId       = null;
       }
     });
-
+ 
     // ── HELPERS ──
     function escHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
-
+ 
     function statusLabel(s) {
-      return { pending:'En attente', approved:'Approuvée', rejected:'Refusée' }[s] || s;
+      return { pending: 'En attente', approved: 'Approuvée', rejected: 'Refusée' }[s] || s;
     }
   </script>
 </body>
