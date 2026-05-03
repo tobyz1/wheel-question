@@ -787,49 +787,53 @@
 // ── AUTH ──
 signinBtn.addEventListener('click', async () => {
   const provider = new GoogleAuthProvider();
-  await signInWithPopup(auth, provider);
+  await signInWithRedirect(auth, provider);
 });
-
 logoutBtn.addEventListener('click', () => signOut(auth));
 
 // Lance d'abord le redirect result, PUIS écoute l'état
 getRedirectResult(auth)
-  .then(() => {
-    // Maintenant on écoute
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        authScreen.style.display = 'flex';
-        adminPanel.style.display = 'none';
-        adminInfo.style.display  = 'none';
-        logoutBtn.style.display  = 'none';
-        return;
-      }
+  .then(async (result) => {
+    if (result?.user) {
+      console.log("Retour redirect, UID :", result.user.uid);
+    }
+  })
+  .catch(e => console.error("Redirect error:", e));
 
-      console.log("Connecté :", user.uid);
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    authScreen.style.display = 'flex';
+    adminPanel.style.display = 'none';
+    adminInfo.style.display  = 'none';
+    logoutBtn.style.display  = 'none';
+    return;
+  }
 
-      try {
-        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+  console.log("Connecté :", user.uid);
 
-        if (!adminDoc.exists()) {
-          noAccessMsg.style.display = 'block';
-          await signOut(auth);
-          return;
-        }
+  try {
+    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
 
-        authScreen.style.display = 'none';
-        adminPanel.style.display = 'block';
-        adminInfo.style.display  = 'flex';
-        logoutBtn.style.display  = 'block';
-        adminEmail.textContent   = user.email;
+    if (!adminDoc.exists()) {
+      noAccessMsg.style.display = 'block';
+      await signOut(auth);
+      return;
+    }
 
-        loadStats();
-        loadSubmissions(currentFilter);
+    authScreen.style.display = 'none';
+    adminPanel.style.display = 'block';
+    adminInfo.style.display  = 'flex';
+    logoutBtn.style.display  = 'block';
+    adminEmail.textContent   = user.email;
 
-      } catch (e) {
-        console.error("Erreur auth/admin :", e);
-        showToast("Erreur chargement admin", "error");
-      }
-    });
+    loadStats();
+    loadSubmissions(currentFilter);
+
+  } catch (e) {
+    console.error("Erreur auth/admin :", e);
+    showToast("Erreur chargement admin", "error");
+  }
+});
   })
   .catch(e => {
     console.error("Redirect error:", e);
