@@ -1461,6 +1461,18 @@ const votesSnap = await db
     showQuestion(currentQuestion, false);
   }
 
+    function isColorLight(rgbString) {
+  // Extrait les valeurs RGB de "rgb(r,g,b)"
+  const match = rgbString.match(/\d+/g);
+  if (!match || match.length < 3) return false;
+  const r = parseInt(match[0]);
+  const g = parseInt(match[1]);
+  const b = parseInt(match[2]);
+  // Calcule la luminosité (formule standard)
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5;
+}
+
   spinBtn.onclick = function () {
     value += Math.ceil(Math.random() * 3600);
     wheel.style.transform = 'rotate(' + value + 'deg)';
@@ -1479,7 +1491,17 @@ const votesSnap = await db
     console.log("📍 Thème sélectionné:", selectedTheme);
     
     const selectedColor = getComputedStyle(selectedSection).getPropertyValue('--clr');
-    document.body.style.background = shadeColor(selectedColor, -55);
+    const bgColor = shadeColor(selectedColor, -55);
+    document.body.style.background = bgColor;
+    
+    // Adapte la couleur du texte selon la luminosité du fond
+    const questionDisplay = document.getElementById('question-display');
+    if (isColorLight(bgColor)) {
+      questionDisplay.style.color = 'rgba(20,20,20,0.9)'; // Texte sombre sur fond clair
+    } else {
+      questionDisplay.style.color = 'rgba(255,255,255,0.82)'; // Texte blanc sur fond sombre
+    }
+    
     document.getElementById('selected-theme').textContent = selectedTheme;
     spinBtn.classList.remove('blinking');
     wheel.classList.remove('blinkaaa');
@@ -1496,7 +1518,6 @@ const votesSnap = await db
       console.log("📖 Chargement depuis Firestore...");
       const snap = await db.collection('questions').doc(selectedTheme).collection('items').get();
       console.log("📊 Snapshot reçu, documents:", snap.size);
-      // ... reste du code
       snap.forEach(doc => {
         const text = doc.data().text;
         if (text) {
