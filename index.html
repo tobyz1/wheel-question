@@ -1471,28 +1471,33 @@ async function getQuestionData(q, useRemote = true) {
   };
 
  wheel.addEventListener('transitionend', async function () {
+    console.log("🎯 TRANSITIONEND CALLED");
+    
     const actualRotation = value % 360;
     const sectionIndex = Math.floor(actualRotation / 30) % 12;
     const selectedSection = document.querySelector('.wheel .number:nth-child(' + (12 - sectionIndex + 1) + ')');
     const selectedTheme = themeList[parseInt(selectedSection.style.getPropertyValue('--i')) - 1];
+    console.log("📍 Thème sélectionné:", selectedTheme);
+    
     const selectedColor = getComputedStyle(selectedSection).getPropertyValue('--clr');
-
     document.body.style.background = shadeColor(selectedColor, -55);
     document.getElementById('selected-theme').textContent = selectedTheme;
     spinBtn.classList.remove('blinking');
     wheel.classList.remove('blinkaaa');
 
     currentTheme = selectedTheme;
-
-    // S'assurer que l'auth est prête avant tout appel Firestore
+    console.log("🔐 Appel ensureSignedIn...");
     await ensureSignedIn();
+    console.log("✅ User connecté");
 
-    // Charge les questions depuis Firestore
     currentQuestions = [];
-    questionDocIdMap.clear(); // Vide la map avant de la remplir
+    questionDocIdMap.clear();
     
     try {
+      console.log("📖 Chargement depuis Firestore...");
       const snap = await db.collection('questions').doc(selectedTheme).collection('items').get();
+      console.log("📊 Snapshot reçu, documents:", snap.size);
+      // ... reste du code
       snap.forEach(doc => {
         const text = doc.data().text;
         if (text) {
