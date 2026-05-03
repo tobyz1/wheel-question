@@ -784,8 +784,8 @@
       toastTimer = setTimeout(() => { toast.className = ''; }, 3000);
     }
 
-    // ── AUTH ──
-    signinBtn.addEventListener('click', async () => {
+// ── AUTH ──
+signinBtn.addEventListener('click', async () => {
   const provider = new GoogleAuthProvider();
   try {
     await signInWithRedirect(auth, provider);
@@ -803,7 +803,7 @@ window.addEventListener('load', async () => {
     console.error("Erreur redirect:", error);
   }
 });
-
+getRedirectResult(auth).catch(e => console.error("Redirect error:", e));
 // Etat utilisateur
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
