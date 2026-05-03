@@ -85,6 +85,15 @@ service cloud.firestore {
       allow write: if isSignedIn();
     }
 
+    // ─────────────────────────────────────────────────────────
+// questionStats/{questionId}/votes/{userId}
+//   - Lecture : connecté
+//   - Écriture : connecté (son propre vote uniquement)
+// ─────────────────────────────────────────────────────────
+match /questionStats/{questionId}/votes/{userId} {
+  allow read:  if isSignedIn();
+  allow write: if isOwner(userId);
+}
 
     // ─────────────────────────────────────────────────────────
     // notes/{userId}/{noteId}  — notes privées
