@@ -1467,54 +1467,58 @@ async function getQuestionData(q, useRemote = true) {
   };
 
  wheel.addEventListener('transitionend', async function () {
-  const actualRotation = value % 360;
-  const sectionIndex = Math.floor(actualRotation / 30) % 12;
-  const selectedSection = document.querySelector('.wheel .number:nth-child(' + (12 - sectionIndex + 1) + ')');
-  const selectedTheme = themeList[parseInt(selectedSection.style.getPropertyValue('--i')) - 1];
-  const selectedColor = getComputedStyle(selectedSection).getPropertyValue('--clr');
+    const actualRotation = value % 360;
+    const sectionIndex = Math.floor(actualRotation / 30) % 12;
+    const selectedSection = document.querySelector('.wheel .number:nth-child(' + (12 - sectionIndex + 1) + ')');
+    const selectedTheme = themeList[parseInt(selectedSection.style.getPropertyValue('--i')) - 1];
+    const selectedColor = getComputedStyle(selectedSection).getPropertyValue('--clr');
 
-  document.body.style.background = shadeColor(selectedColor, -55);
-  document.getElementById('selected-theme').textContent = selectedTheme;
-  spinBtn.classList.remove('blinking');
-  wheel.classList.remove('blinkaaa');
+    document.body.style.background = shadeColor(selectedColor, -55);
+    document.getElementById('selected-theme').textContent = selectedTheme;
+    spinBtn.classList.remove('blinking');
+    wheel.classList.remove('blinkaaa');
 
-  currentTheme = selectedTheme;
+    currentTheme = selectedTheme;
 
-  // S'assurer que l'auth est prête avant tout appel Firestore
-  await ensureSignedIn();
+    // S'assurer que l'auth est prête avant tout appel Firestore
+    await ensureSignedIn();
 
-  currentQuestions = [];
-  try {
-    const snap = await db.collection('questions').doc(selectedTheme).collection('items').get();
-    snap.forEach(doc => {
-  const text = doc.data().text;
-  if (text) {
-    currentQuestions.push(text);
-    questionDocIdMap.set(text, { docId: doc.id, theme: selectedTheme });
-  }
-});
-    console.log(currentQuestions.length + ' questions chargees pour ' + selectedTheme);
-  } catch (e) {
-    console.error('Erreur chargement Firestore, fallback local :', e);
-    currentQuestions = themesQuestions[selectedTheme] || [];
-  }
+    // Charge les questions depuis Firestore
+    currentQuestions = [];
+    questionDocIdMap.clear(); // Vide la map avant de la remplir
+    
+    try {
+      const snap = await db.collection('questions').doc(selectedTheme).collection('items').get();
+      snap.forEach(doc => {
+        const text = doc.data().text;
+        if (text) {
+          currentQuestions.push(text);
+          questionDocIdMap.set(text, { docId: doc.id, theme: selectedTheme });
+        }
+      });
+      console.log('✅ ' + currentQuestions.length + ' questions chargées pour ' + selectedTheme);
+      console.log('Map:', questionDocIdMap);
+    } catch (e) {
+      console.error('Erreur chargement Firestore:', e);
+    }
 
-  const q = await getNextQuestionForSession();
-  if (!q) {
-    document.getElementById('question-display').innerHTML = '<p><strong>⏳ Toutes les questions de ce thème ont déjà été posées aujourd\'hui. Revenez demain !</strong></p>';
-    hideUI();
-    return;
-  }
+    const q = await getNextQuestionForSession();
+    if (!q) {
+      document.getElementById('question-display').innerHTML = '<p><strong>⏳ Toutes les questions de ce thème ont déjà été posées aujourd\'hui. Revenez demain !</strong></p>';
+      hideUI();
+      return;
+    }
 
-  if (sessionIndex < sessionQuestions.length - 1) {
-    sessionQuestions = sessionQuestions.slice(0, sessionIndex + 1);
-  }
-  sessionQuestions.push(q);
-  sessionIndex = sessionQuestions.length - 1;
-  currentQuestion = q;
-  saveAskedQuestion(q);
-  showQuestion(q, true);
-});
+    if (sessionIndex < sessionQuestions.length - 1) {
+      sessionQuestions = sessionQuestions.slice(0, sessionIndex + 1);
+    }
+    sessionQuestions.push(q);
+    sessionIndex = sessionQuestions.length - 1;
+    currentQuestion = q;
+    saveAskedQuestion(q);
+    showQuestion(q, true);
+  });
+    
   function shadeColor(hex, percent) {
     hex = hex.trim();
     let r = parseInt(hex.slice(1, 3), 16);
