@@ -1479,7 +1479,20 @@ firebase.auth().signInAnonymously()
     wheel.classList.remove('blinkaaa');
 
     currentTheme = selectedTheme;
-    currentQuestions = themesQuestions[selectedTheme] || [];
+
+    // Charge uniquement depuis Firestore
+    currentQuestions = [];
+    try {
+      const snap = await db.collection('questions').doc(selectedTheme).collection('items').get();
+      snap.forEach(doc => {
+        const text = doc.data().text;
+        if (text) currentQuestions.push(text);
+      });
+      console.log(currentQuestions.length + ' questions chargees pour ' + selectedTheme);
+    } catch (e) {
+      console.error('Erreur chargement Firestore, fallback local :', e);
+      currentQuestions = themesQuestions[selectedTheme] || [];
+    }
 
     const q = await getNextQuestionForSession();
     if (!q) {
