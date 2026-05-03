@@ -790,30 +790,28 @@
   try {
     await signInWithRedirect(auth, provider);
   } catch (e) {
+    console.error(e);
     showToast('Erreur de connexion', 'error');
   }
 });
 
-getRedirectResult(auth).then((result) => {
-  // connexion gérée par onAuthStateChanged
-}).catch((e) => {
-  if (e.code && e.code !== 'auth/null-user') {
-    showToast('Erreur : ' + e.message, 'error');
+// Gestion du retour
+window.addEventListener('load', async () => {
+  try {
+    await getRedirectResult(auth);
+  } catch (error) {
+    console.error("Erreur redirect:", error);
   }
 });
 
-    logoutBtn.addEventListener('click', () => signOut(auth));
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        authScreen.style.display = 'flex';
-        adminPanel.style.display = 'none';
-        adminInfo.style.display  = 'none';
-        logoutBtn.style.display  = 'none';
-        noAccessMsg.style.display= 'none';
-        if (unsubscribe) { unsubscribe(); unsubscribe = null; }
-        return;
-      }
+// Etat utilisateur
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("Connecté :", user.uid);
+  } else {
+    console.log("Non connecté");
+  }
+});
 
       // Vérifie admin
       const adminDoc = await getDoc(doc(db, 'admins', user.uid));
