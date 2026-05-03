@@ -1181,28 +1181,27 @@ body {
     return { avg: 3, count: 0, asked: 0 };
   }
 
-  async function ensureSignedIn() {
-  return new Promise((resolve, reject) => {
-    if (auth.currentUser) {
-      signedInUserId = auth.currentUser.uid;
-      resolve(auth.currentUser);
-      return;
+ // Promesse résolue dès que l'auth est prête
+const authReady = new Promise((resolve) => {
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      signedInUserId = user.uid;
+      resolve(user);
+    } else {
+      auth.signInAnonymously()
+        .then(cred => {
+          signedInUserId = cred.user.uid;
+          resolve(cred.user);
+        })
+        .catch(e => console.error('Erreur auth anonyme:', e));
     }
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      unsubscribe();
-      if (user) {
-        signedInUserId = user.uid;
-        resolve(user);
-      } else {
-        auth.signInAnonymously()
-          .then(cred => {
-            signedInUserId = cred.user.uid;
-            resolve(cred.user);
-          })
-          .catch(reject);
-      }
-    });
   });
+});
+
+async function ensureSignedIn() {
+  const user = await authReady;
+  signedInUserId = user.uid;
+  return user;
 }
     const credential = await auth.signInAnonymously();
     signedInUserId = credential.user.uid;
