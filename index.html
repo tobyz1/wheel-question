@@ -1293,13 +1293,17 @@ async function getQuestionData(q, useRemote = true) {
 
     await ensureSignedIn();
     const info = questionDocIdMap.get(q);
-    if (!info) return defaultQuestionStats();
+    if (!info) {
+      console.warn('Question non trouvée dans la map:', q);
+      return defaultQuestionStats();
+    }
     const { docId, theme } = info;
 
+    // Utilise getDocs au lieu de get()
     const votesSnap = await db
       .collection('questions').doc(theme)
       .collection('items').doc(docId)
-      .collection('votes').get();
+      .collection('votes').getDocs(); // ← CHANGE .get() en .getDocs()
 
     let sum = 0, count = 0;
     votesSnap.forEach(doc => {
@@ -1312,7 +1316,7 @@ async function getQuestionData(q, useRemote = true) {
     questionStatsCache.set(q, parsed);
     return parsed;
   } catch (e) {
-    console.error('Erreur lecture:', e);
+    console.error('Erreur lecture votes:', e);
     return questionStatsCache.get(q) || defaultQuestionStats();
   }
 }
