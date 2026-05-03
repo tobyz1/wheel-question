@@ -787,62 +787,54 @@
 // ── AUTH ──
 signinBtn.addEventListener('click', async () => {
   const provider = new GoogleAuthProvider();
-  try {
-    await signInWithRedirect(auth, provider);
-  } catch (e) {
-    console.error(e);
-    showToast('Erreur de connexion', 'error');
-  }
+  await signInWithRedirect(auth, provider);
 });
 
-// Gestion du retour
-window.addEventListener('load', async () => {
-  try {
-    await getRedirectResult(auth);
-  } catch (error) {
-    console.error("Erreur redirect:", error);
-  }
-});
-getRedirectResult(auth).catch(e => console.error("Redirect error:", e));
-// Etat utilisateur
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    console.log("Non connecté");
-    authScreen.style.display = 'flex';
-    adminPanel.style.display = 'none';
-    adminInfo.style.display  = 'none';
-    logoutBtn.style.display  = 'none';
-    return;
-  }
+logoutBtn.addEventListener('click', () => signOut(auth));
 
-  console.log("Connecté :", user.uid);
+// Lance d'abord le redirect result, PUIS écoute l'état
+getRedirectResult(auth)
+  .then(() => {
+    // Maintenant on écoute
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        authScreen.style.display = 'flex';
+        adminPanel.style.display = 'none';
+        adminInfo.style.display  = 'none';
+        logoutBtn.style.display  = 'none';
+        return;
+      }
 
-  try {
-    // 🔐 Vérification admin
-    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+      console.log("Connecté :", user.uid);
 
-    if (!adminDoc.exists()) {
-      noAccessMsg.style.display = 'block';
-      await signOut(auth);
-      return;
-    }
+      try {
+        const adminDoc = await getDoc(doc(db, 'admins', user.uid));
 
-    // ✅ UI admin
-    authScreen.style.display = 'none';
-    adminPanel.style.display = 'block';
-    adminInfo.style.display  = 'flex';
-    logoutBtn.style.display  = 'block';
-    adminEmail.textContent   = user.email;
+        if (!adminDoc.exists()) {
+          noAccessMsg.style.display = 'block';
+          await signOut(auth);
+          return;
+        }
 
-    // 🔄 Load data
-    loadStats();
-    loadSubmissions(currentFilter);
+        authScreen.style.display = 'none';
+        adminPanel.style.display = 'block';
+        adminInfo.style.display  = 'flex';
+        logoutBtn.style.display  = 'block';
+        adminEmail.textContent   = user.email;
 
-  } catch (e) {
-    console.error("Erreur auth/admin :", e);
-    showToast("Erreur chargement admin", "error");
-  }
-});
+        loadStats();
+        loadSubmissions(currentFilter);
+
+      } catch (e) {
+        console.error("Erreur auth/admin :", e);
+        showToast("Erreur chargement admin", "error");
+      }
+    });
+  })
+  .catch(e => {
+    console.error("Redirect error:", e);
+    showToast("Erreur de connexion", "error");
+  });
 
     // ── STATS (toutes les submissions en une requête) ──
     function loadStats() {
