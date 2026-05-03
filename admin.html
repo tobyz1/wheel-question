@@ -42,7 +42,6 @@
       flex-direction: column;
     }
 
-    /* ── NOISE OVERLAY ── */
     body::before {
       content: '';
       position: fixed;
@@ -53,7 +52,6 @@
       opacity: 0.6;
     }
 
-    /* ── HEADER ── */
     header {
       position: sticky;
       top: 0;
@@ -113,9 +111,7 @@
       color: var(--text-muted);
     }
 
-    #admin-info span {
-      color: var(--accent);
-    }
+    #admin-info span { color: var(--accent); }
 
     .btn-logout {
       padding: 6px 14px;
@@ -134,7 +130,6 @@
       color: var(--danger);
     }
 
-    /* ── MAIN LAYOUT ── */
     main {
       flex: 1;
       position: relative;
@@ -145,7 +140,6 @@
       padding: 40px 24px 80px;
     }
 
-    /* ── AUTH SCREEN ── */
     #auth-screen {
       display: flex;
       align-items: center;
@@ -201,7 +195,6 @@
       font-family: 'DM Mono', monospace;
     }
 
-    /* ── STATS BAR ── */
     .stats-bar {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -231,11 +224,10 @@
       line-height: 1;
     }
 
-    .stat-card.pending .stat-value { color: var(--warn); }
+    .stat-card.pending .stat-value  { color: var(--warn); }
     .stat-card.approved .stat-value { color: var(--approved); }
     .stat-card.rejected .stat-value { color: var(--danger); }
 
-    /* ── FILTER TABS ── */
     .filter-tabs {
       display: flex;
       gap: 4px;
@@ -268,7 +260,6 @@
       border: 1px solid var(--border-hover);
     }
 
-    /* ── SUBMISSION CARDS ── */
     #submissions-list {
       display: flex;
       flex-direction: column;
@@ -289,13 +280,9 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .submission-card:hover {
-      border-color: var(--border-hover);
-    }
+    .submission-card:hover { border-color: var(--border-hover); }
 
-    .card-top {
-      padding: 18px 20px 14px;
-    }
+    .card-top { padding: 18px 20px 14px; }
 
     .card-meta {
       display: flex;
@@ -328,9 +315,9 @@
       font-family: 'DM Mono', monospace;
     }
 
-    .status-badge.pending  { background: var(--warn-dim);     color: var(--warn);    border: 1px solid rgba(255,169,85,0.2); }
-    .status-badge.approved { background: var(--approved-dim); color: var(--approved);border: 1px solid rgba(96,208,160,0.2); }
-    .status-badge.rejected { background: var(--danger-dim);   color: var(--danger);  border: 1px solid rgba(255,95,109,0.2); }
+    .status-badge.pending  { background: var(--warn-dim);     color: var(--warn);     border: 1px solid rgba(255,169,85,0.2); }
+    .status-badge.approved { background: var(--approved-dim); color: var(--approved); border: 1px solid rgba(96,208,160,0.2); }
+    .status-badge.rejected { background: var(--danger-dim);   color: var(--danger);   border: 1px solid rgba(255,95,109,0.2); }
 
     .card-date {
       font-size: 0.68rem;
@@ -355,7 +342,6 @@
 
     .card-uid span { color: var(--text-dim); }
 
-    /* Rejection reason display */
     .rejection-reason {
       margin: 0 20px 14px;
       padding: 10px 14px;
@@ -372,7 +358,6 @@
       opacity: 0.6;
     }
 
-    /* ── ACTIONS ── */
     .card-actions {
       border-top: 1px solid var(--border);
       padding: 12px 20px;
@@ -433,7 +418,6 @@
       margin-left: auto;
     }
 
-    /* ── REJECT MODAL ── */
     #reject-modal-backdrop {
       display: none;
       position: fixed;
@@ -445,9 +429,7 @@
       justify-content: center;
     }
 
-    #reject-modal-backdrop.open {
-      display: flex;
-    }
+    #reject-modal-backdrop.open { display: flex; }
 
     .reject-modal {
       background: var(--surface);
@@ -518,11 +500,8 @@
       color: var(--danger);
     }
 
-    .btn-confirm-reject:hover {
-      background: rgba(255,95,109,0.2);
-    }
+    .btn-confirm-reject:hover { background: rgba(255,95,109,0.2); }
 
-    /* ── EMPTY / LOADING STATES ── */
     .state-msg {
       text-align: center;
       padding: 60px 24px;
@@ -548,7 +527,6 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── TOAST ── */
     #toast {
       position: fixed;
       bottom: 32px;
@@ -566,11 +544,10 @@
       white-space: nowrap;
     }
 
-    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.show    { transform: translateX(-50%) translateY(0); }
     #toast.success { border-color: rgba(96,208,160,0.4); color: var(--approved); }
     #toast.error   { border-color: rgba(255,95,109,0.4); color: var(--danger); }
 
-    /* ── GOOGLE SIGN IN BTN ── */
     .btn-google {
       display: flex;
       align-items: center;
@@ -590,10 +567,8 @@
     }
 
     .btn-google:hover { opacity: 0.9; }
-
     .btn-google svg { width: 18px; height: 18px; }
 
-    /* ── SECTION TITLE ── */
     .section-title {
       font-size: 0.7rem;
       text-transform: uppercase;
@@ -665,8 +640,7 @@
     <!-- ADMIN PANEL -->
     <div id="admin-panel">
 
-      <!-- Stats -->
-      <div class="stats-bar" id="stats-bar">
+      <div class="stats-bar">
         <div class="stat-card pending">
           <div class="stat-label">En attente</div>
           <div class="stat-value" id="count-pending">—</div>
@@ -681,7 +655,6 @@
         </div>
       </div>
 
-      <!-- Filter tabs -->
       <div class="filter-tabs">
         <button class="tab-btn active" data-filter="pending">En attente</button>
         <button class="tab-btn" data-filter="approved">Approuvées</button>
@@ -691,7 +664,6 @@
 
       <div class="section-title" id="list-label">Propositions en attente</div>
 
-      <!-- List -->
       <div id="submissions-list">
         <div class="state-msg">
           <div class="spinner"></div>
@@ -718,15 +690,14 @@
   <!-- TOAST -->
   <div id="toast"></div>
 
-  <!-- Firebase -->
-   <script type="module">
+  <script type="module">
     import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged }
                                       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { getFirestore, collection, doc, getDoc, addDoc, updateDoc,
              onSnapshot, query, where, orderBy, serverTimestamp }
                                       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
- 
+
     const firebaseConfig = {
       apiKey:            "AIzaSyCVxw8U-DvB8YxQv09MlOcy8q5q9vlajDk",
       authDomain:        "roue-des-questions.firebaseapp.com",
@@ -736,11 +707,11 @@
       appId:             "1:297075017743:web:0bf54c8d1252c027a8fb7a",
       measurementId:     "G-ZXY1B21J3S"
     };
- 
+
     const app  = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db   = getFirestore(app);
- 
+
     // ── DOM refs ──
     const authScreen    = document.getElementById('auth-screen');
     const adminPanel    = document.getElementById('admin-panel');
@@ -760,18 +731,18 @@
     const modalCancel   = document.getElementById('modal-cancel');
     const modalConfirm  = document.getElementById('modal-confirm');
     const toast         = document.getElementById('toast');
- 
+
     let currentFilter   = 'pending';
     let unsubscribe     = null;
     let pendingRejectId = null;
- 
+
     const LABELS = {
       pending:  'Propositions en attente',
       approved: 'Questions approuvées',
       rejected: 'Questions refusées',
       all:      'Toutes les propositions'
     };
- 
+
     // ── TOAST ──
     let toastTimer;
     function showToast(msg, type = '') {
@@ -780,15 +751,15 @@
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => { toast.className = ''; }, 3000);
     }
- 
+
     // ── AUTH ──
     signinBtn.addEventListener('click', async () => {
       const provider = new GoogleAuthProvider();
       await signInWithRedirect(auth, provider);
     });
- 
+
     logoutBtn.addEventListener('click', () => signOut(auth));
- 
+
     // Traite le retour de redirection Google, puis démarre l'écoute auth
     getRedirectResult(auth)
       .then((result) => {
@@ -806,34 +777,34 @@
             logoutBtn.style.display  = 'none';
             return;
           }
- 
+
           console.log("Connecté :", user.uid);
- 
+
           try {
             const adminDoc = await getDoc(doc(db, 'admins', user.uid));
- 
+
             if (!adminDoc.exists()) {
               noAccessMsg.style.display = 'block';
               await signOut(auth);
               return;
             }
- 
+
             authScreen.style.display = 'none';
             adminPanel.style.display = 'block';
             adminInfo.style.display  = 'flex';
             logoutBtn.style.display  = 'block';
             adminEmail.textContent   = user.email;
- 
+
             loadStats();
             loadSubmissions(currentFilter);
- 
+
           } catch (e) {
             console.error("Erreur auth/admin :", e);
             showToast("Erreur chargement admin", "error");
           }
         });
       });
- 
+
     // ── STATS ──
     function loadStats() {
       onSnapshot(collection(db, 'questionSubmissions'), (snap) => {
@@ -847,7 +818,7 @@
         countRejected.textContent = c.rejected;
       });
     }
- 
+
     // ── FILTER TABS ──
     tabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -858,17 +829,17 @@
         loadSubmissions(currentFilter);
       });
     });
- 
+
     // ── LOAD SUBMISSIONS ──
     function loadSubmissions(filter) {
       if (unsubscribe) unsubscribe();
       submList.innerHTML = `<div class="state-msg"><div class="spinner"></div>Chargement…</div>`;
- 
+
       const ref = collection(db, 'questionSubmissions');
       const q   = filter === 'all'
         ? query(ref, orderBy('createdAt', 'desc'))
         : query(ref, where('status', '==', filter), orderBy('createdAt', 'desc'));
- 
+
       unsubscribe = onSnapshot(q, (snap) => {
         if (snap.empty) {
           submList.innerHTML = `<div class="state-msg"><span class="icon">📭</span>Aucune proposition ici.</div>`;
@@ -882,24 +853,24 @@
         submList.innerHTML = `<div class="state-msg">Erreur : ${err.message}</div>`;
       });
     }
- 
+
     // ── BUILD CARD ──
     function buildCard(id, data) {
       const card = document.createElement('div');
       card.className  = 'submission-card';
       card.dataset.id = id;
- 
+
       const date = data.createdAt?.toDate
         ? data.createdAt.toDate().toLocaleDateString('fr-FR', {
             day: '2-digit', month: 'short', year: 'numeric',
             hour: '2-digit', minute: '2-digit'
           })
         : '—';
- 
+
       const isPending  = data.status === 'pending';
       const isApproved = data.status === 'approved';
       const isRejected = data.status === 'rejected';
- 
+
       card.innerHTML = `
         <div class="card-top">
           <div class="card-meta">
@@ -928,22 +899,22 @@
           `}
         </div>
       `;
- 
+
       card.querySelectorAll('[data-action]').forEach(btn => {
         btn.addEventListener('click', () => {
           if (btn.dataset.action === 'approve') approveSubmission(id, data);
           if (btn.dataset.action === 'reject')  openRejectModal(id);
         });
       });
- 
+
       return card;
     }
- 
+
     // ── APPROVE ──
     async function approveSubmission(id, data) {
       const card = document.querySelector(`[data-id="${id}"]`);
       card.querySelectorAll('.btn').forEach(b => b.disabled = true);
- 
+
       try {
         const targetRef = collection(db, 'questions', data.theme, 'items');
         await addDoc(targetRef, {
@@ -953,20 +924,20 @@
           approvedBy: auth.currentUser.uid,
           sourceId:   id
         });
- 
+
         await updateDoc(doc(db, 'questionSubmissions', id), {
           status:     'approved',
           approvedAt: serverTimestamp(),
           approvedBy: auth.currentUser.uid
         });
- 
+
         showToast('✓ Question approuvée et copiée dans la base', 'success');
       } catch (e) {
         showToast('Erreur : ' + e.message, 'error');
         card.querySelectorAll('.btn').forEach(b => b.disabled = false);
       }
     }
- 
+
     // ── REJECT MODAL ──
     function openRejectModal(id) {
       pendingRejectId    = id;
@@ -974,23 +945,23 @@
       rejectBackdrop.classList.add('open');
       rejectReason.focus();
     }
- 
+
     modalCancel.addEventListener('click', () => {
       rejectBackdrop.classList.remove('open');
       pendingRejectId = null;
     });
- 
+
     rejectBackdrop.addEventListener('click', (e) => {
       if (e.target === rejectBackdrop) {
         rejectBackdrop.classList.remove('open');
         pendingRejectId = null;
       }
     });
- 
+
     modalConfirm.addEventListener('click', async () => {
       if (!pendingRejectId) return;
       modalConfirm.disabled = true;
- 
+
       try {
         await updateDoc(doc(db, 'questionSubmissions', pendingRejectId), {
           status:          'rejected',
@@ -1007,7 +978,7 @@
         pendingRejectId       = null;
       }
     });
- 
+
     // ── HELPERS ──
     function escHtml(str) {
       return str
@@ -1016,7 +987,7 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
     }
- 
+
     function statusLabel(s) {
       return { pending: 'En attente', approved: 'Approuvée', rejected: 'Refusée' }[s] || s;
     }
