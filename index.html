@@ -1300,11 +1300,10 @@ async function getQuestionData(q, useRemote = true) {
     const { docId, theme } = info;
 
     // Utilise getDocs au lieu de get()
-    const votesSnap = await db
-      .collection('questions').doc(theme)
-      .collection('items').doc(docId)
-      .collection('votes').getDocs(); // ← CHANGE .get() en .getDocs()
-
+const votesSnap = await db
+  .collection('questions').doc(theme)
+  .collection('items').doc(docId)
+  .collection('votes').get(); // ← change .getDocs() en .get()
     let sum = 0, count = 0;
     votesSnap.forEach(doc => {
       const value = Number(doc.data()?.value || 0);
