@@ -908,36 +908,35 @@
     }
 
     // ── APPROVE ──
-    async function approveSubmission(id, data) {
-  const card = document.querySelector(`[data-id="${id}"]`);
-  card.querySelectorAll('.btn').forEach(b => b.disabled = true);
-
+async function approveSubmission(id, data) {
   try {
-    console.log("Tentative d'approbation pour le thème :", data.theme);
+    // Liste des thèmes corrects
+    const validThemes = ["Souvenirs", "Perception", "Avenir", "Amitiés", "Famille", "Amour", "Travail", "Malaises", "Croyances", "Conflits", "Expériences", "Loisirs"];
     
-    const targetRef = collection(db, 'questions', data.theme, 'items');
-    const newDoc = await addDoc(targetRef, {
-      text:       data.text,
-      theme:      data.theme,
-      approvedAt: serverTimestamp(),
-      approvedBy: auth.currentUser.uid,
-      sourceId:   id
-    });
-    
-    console.log("✅ Document créé avec l'ID :", newDoc.id);
+    // Normalise le thème (cherche une correspondance)
+    let theme = data.theme;
+    if (!validThemes.includes(theme)) {
+      // Cherche une correspondance case-insensitive
+      theme = validThemes.find(t => t.toLowerCase() === theme.toLowerCase()) || theme;
+    }
 
-    await updateDoc(doc(db, 'questionSubmissions', id), {
-      status:     'approved',
-      approvedAt: serverTimestamp(),
-      approvedBy: auth.currentUser.uid
+    // Ajoute la question au bon endroit
+    await db.collection('questions').doc(theme).collection('items').add({
+      text: data.text,
+      approvedBy: currentUser.uid,
+      approvedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    console.log("✅ Statut mis à jour");
-    showToast('✓ Question approuvée et copiée dans la base', 'success');
+    // Change le statut en "approved"
+    await db.collection('questionSubmissions').doc(id).update({
+      status: 'approved',
+      approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      approvedBy: currentUser.uid
+    });
+
+    loadSubmissions('all');
   } catch (e) {
-    console.error("❌ Erreur approbation :", e.code, e.message);
-    showToast('Erreur : ' + e.message, 'error');
-    card.querySelectorAll('.btn').forEach(b => b.disabled = false);
+    alert('Erreur approbation: ' + e.message);
   }
 }
 
