@@ -805,32 +805,44 @@ window.addEventListener('load', async () => {
 });
 
 // Etat utilisateur
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("Connecté :", user.uid);
-  } else {
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
     console.log("Non connecté");
+    authScreen.style.display = 'flex';
+    adminPanel.style.display = 'none';
+    adminInfo.style.display  = 'none';
+    logoutBtn.style.display  = 'none';
+    return;
+  }
+
+  console.log("Connecté :", user.uid);
+
+  try {
+    // 🔐 Vérification admin
+    const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+
+    if (!adminDoc.exists()) {
+      noAccessMsg.style.display = 'block';
+      await signOut(auth);
+      return;
+    }
+
+    // ✅ UI admin
+    authScreen.style.display = 'none';
+    adminPanel.style.display = 'block';
+    adminInfo.style.display  = 'flex';
+    logoutBtn.style.display  = 'block';
+    adminEmail.textContent   = user.email;
+
+    // 🔄 Load data
+    loadStats();
+    loadSubmissions(currentFilter);
+
+  } catch (e) {
+    console.error("Erreur auth/admin :", e);
+    showToast("Erreur chargement admin", "error");
   }
 });
-
-      // Vérifie admin
-      const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-      if (!adminDoc.exists()) {
-        noAccessMsg.style.display = 'block';
-        await signOut(auth);
-        return;
-      }
-
-      // Connecté + admin ✅
-      authScreen.style.display = 'none';
-      adminPanel.style.display = 'block';
-      adminInfo.style.display  = 'flex';
-      logoutBtn.style.display  = 'block';
-      adminEmail.textContent   = user.email;
-
-      loadStats();
-      loadSubmissions(currentFilter);
-    });
 
     // ── STATS (toutes les submissions en une requête) ──
     function loadStats() {
