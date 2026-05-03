@@ -1099,7 +1099,7 @@ body {
   let sessionQuestions = [];
   let sessionIndex = -1;
   const questionStatsCache = new Map();
-  const questionDocIdMap = new Map();
+  const questionDocIdMap = new Map(); // text -> { docId, theme }
   let signedInUserId = null;
 
   const ratingEl = document.getElementById('rating-container');
@@ -1264,68 +1264,58 @@ async function ensureSignedIn() {
   }
 
   // Firestore SDK functions (global shared ratings)
-  async function saveRating(q, note) {
-    try {
-      await ensureSignedIn();
-      const docId = getStatDocId(q);
-      const statRef = db.collection('questionStats').doc(docId);
-      const voteRef = db
-        .collection('questionStats')
-        .doc(docId)
-        .collection('votes')
-        .doc(signedInUserId);
+ async function saveRating(q, note) {
+  try {
+    await ensureSignedIn();
+    const info = questionDocIdMap.get(q);
+    if (!info) return;
+    const { docId, theme } = info;
 
-      await statRef.set({
-        question: q,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
+    const voteRef = db
+      .collection('questions').doc(theme)
+      .collection('items').doc(docId)
+      .collection('votes').doc(signedInUserId);
 
-      await voteRef.set({
-        value: note,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
+    await voteRef.set({
+      value: note,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
 
-      await getQuestionData(q, true);
-    } catch (e) {
-      console.error("Erreur sauvegarde:", e);
-    }
+    await getQuestionData(q, true);
+  } catch (e) {
+    console.error('Erreur sauvegarde:', e);
   }
+}
 
-  async function getQuestionData(q, useRemote = true) {
-    try {
-      if (!useRemote) return questionStatsCache.get(q) || defaultQuestionStats();
+async function getQuestionData(q, useRemote = true) {
+  try {
+    if (!useRemote) return questionStatsCache.get(q) || defaultQuestionStats();
 
-      await ensureSignedIn();
-      const docId = getStatDocId(q);
-      const votesSnap = await db
-        .collection('questionStats')
-        .doc(docId)
-        .collection('votes')
-        .get();
+    await ensureSignedIn();
+    const info = questionDocIdMap.get(q);
+    if (!info) return defaultQuestionStats();
+    const { docId, theme } = info;
 
-      let sum = 0;
-      let count = 0;
-      votesSnap.forEach((doc) => {
-        const value = Number(doc.data()?.value || 0);
-        if (value >= 1 && value <= 5) {
-          sum += value;
-          count += 1;
-        }
-      });
+    const votesSnap = await db
+      .collection('questions').doc(theme)
+      .collection('items').doc(docId)
+      .collection('votes').get();
 
-      const asked = questionStatsCache.get(q)?.asked || 0;
-      const parsed = {
-        avg: count > 0 ? sum / count : 3,
-        count: count,
-        asked: asked
-      };
-      questionStatsCache.set(q, parsed);
-      return parsed;
-    } catch (e) {
-      console.error("Erreur lecture:", e);
-      return questionStatsCache.get(q) || defaultQuestionStats();
-    }
+    let sum = 0, count = 0;
+    votesSnap.forEach(doc => {
+      const value = Number(doc.data()?.value || 0);
+      if (value >= 1 && value <= 5) { sum += value; count++; }
+    });
+
+    const asked = questionStatsCache.get(q)?.asked || 0;
+    const parsed = { avg: count > 0 ? sum / count : 3, count, asked };
+    questionStatsCache.set(q, parsed);
+    return parsed;
+  } catch (e) {
+    console.error('Erreur lecture:', e);
+    return questionStatsCache.get(q) || defaultQuestionStats();
   }
+}
 
   async function markQuestionAsked(q) {
     const current = questionStatsCache.get(q) || defaultQuestionStats();
@@ -1497,12 +1487,12 @@ async function ensureSignedIn() {
   try {
     const snap = await db.collection('questions').doc(selectedTheme).collection('items').get();
     snap.forEach(doc => {
-      const text = doc.data().text;
-      if (text) {
-        currentQuestions.push(text);
-        questionDocIdMap.set(text, doc.id); // lie le texte à l'ID Firestore
-      }
-    });
+  const text = doc.data().text;
+  if (text) {
+    currentQuestions.push(text);
+    questionDocIdMap.set(text, { docId: doc.id, theme: selectedTheme });
+  }
+});
     console.log(currentQuestions.length + ' questions chargees pour ' + selectedTheme);
   } catch (e) {
     console.error('Erreur chargement Firestore, fallback local :', e);
