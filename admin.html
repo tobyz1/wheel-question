@@ -912,31 +912,37 @@
 
     // ── APPROVE ──
     async function approveSubmission(id, data) {
-      const card = document.querySelector(`[data-id="${id}"]`);
-      card.querySelectorAll('.btn').forEach(b => b.disabled = true);
+  const card = document.querySelector(`[data-id="${id}"]`);
+  card.querySelectorAll('.btn').forEach(b => b.disabled = true);
 
-      try {
-        const targetRef = collection(db, 'questions', data.theme, 'items');
-        await addDoc(targetRef, {
-          text:       data.text,
-          theme:      data.theme,
-          approvedAt: serverTimestamp(),
-          approvedBy: auth.currentUser.uid,
-          sourceId:   id
-        });
+  try {
+    console.log("Tentative d'approbation pour le thème :", data.theme);
+    
+    const targetRef = collection(db, 'questions', data.theme, 'items');
+    const newDoc = await addDoc(targetRef, {
+      text:       data.text,
+      theme:      data.theme,
+      approvedAt: serverTimestamp(),
+      approvedBy: auth.currentUser.uid,
+      sourceId:   id
+    });
+    
+    console.log("✅ Document créé avec l'ID :", newDoc.id);
 
-        await updateDoc(doc(db, 'questionSubmissions', id), {
-          status:     'approved',
-          approvedAt: serverTimestamp(),
-          approvedBy: auth.currentUser.uid
-        });
+    await updateDoc(doc(db, 'questionSubmissions', id), {
+      status:     'approved',
+      approvedAt: serverTimestamp(),
+      approvedBy: auth.currentUser.uid
+    });
 
-        showToast('✓ Question approuvée et copiée dans la base', 'success');
-      } catch (e) {
-        showToast('Erreur : ' + e.message, 'error');
-        card.querySelectorAll('.btn').forEach(b => b.disabled = false);
-      }
-    }
+    console.log("✅ Statut mis à jour");
+    showToast('✓ Question approuvée et copiée dans la base', 'success');
+  } catch (e) {
+    console.error("❌ Erreur approbation :", e.code, e.message);
+    showToast('Erreur : ' + e.message, 'error');
+    card.querySelectorAll('.btn').forEach(b => b.disabled = false);
+  }
+}
 
     // ── REJECT MODAL ──
     function openRejectModal(id) {
