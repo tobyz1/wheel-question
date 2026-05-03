@@ -787,7 +787,7 @@
 // ── AUTH ──
 signinBtn.addEventListener('click', async () => {
   const provider = new GoogleAuthProvider();
-  await signInWithRedirect(auth, provider);
+  await signInWithPopup(auth, provider);
 });
 
 logoutBtn.addEventListener('click', () => signOut(auth));
