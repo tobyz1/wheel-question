@@ -1203,11 +1203,28 @@ async function ensureSignedIn() {
   signedInUserId = user.uid;
   return user;
 }
-    const credential = await auth.signInAnonymously();
-    signedInUserId = credential.user.uid;
-    return credential.user;
-  }
+// Promesse résolue dès que l'auth est prête
+const authReady = new Promise((resolve) => {
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      signedInUserId = user.uid;
+      resolve(user);
+    } else {
+      auth.signInAnonymously()
+        .then(cred => {
+          signedInUserId = cred.user.uid;
+          resolve(cred.user);
+        })
+        .catch(e => console.error('Erreur auth anonyme:', e));
+    }
+  });
+});
 
+async function ensureSignedIn() {
+  const user = await authReady;
+  signedInUserId = user.uid;
+  return user;
+}
   function setSuggestionFeedback(message, isError = false) {
     suggestionFeedback.textContent = message;
     suggestionFeedback.style.color = isError ? 'rgba(255,170,170,0.95)' : 'rgba(180,255,200,0.95)';
