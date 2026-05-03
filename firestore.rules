@@ -90,7 +90,7 @@ service cloud.firestore {
 //   - Lecture : connecté
 //   - Écriture : connecté (son propre vote uniquement)
 // ─────────────────────────────────────────────────────────
-match /questionStats/{questionId}/votes/{userId} {
+match /questions/{theme}/items/{questionId}/votes/{userId} {
   allow read:  if isSignedIn();
   allow write: if isOwner(userId);
 }
